@@ -4,3 +4,7 @@
 _build/
 auto_examples/
 gen_api/
+*.egg-info/*
+*.png
+*.csv
+*.tif
