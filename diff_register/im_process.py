@@ -3,11 +3,13 @@ import skfuzzy as fuzz
 from skfuzzy import control as ctrl
 import skimage.io as sio
 import matplotlib.pyplot as plt
-from skimage.morphology import square, opening, closing
+import skimage
+from skimage.morphology import square, opening, closing, skeletonize
 from skimage.measure import regionprops, label
+from skan import csr, draw
 
 
-def fuzzy_contrast(image_file, figsize=(10, 10)):
+def fuzzy_contrast(image_file, figsize=(10, 10), show=False):
     """
     Increase the contrast of input image by using fuzzy logic.
     """
@@ -44,10 +46,11 @@ def fuzzy_contrast(image_file, figsize=(10, 10)):
     F.compute()
     fuzzy_image = F.output['darker']
 
-    fig, ax = plt.subplots(figsize=figsize)
-    rf_image = (255.0 / fuzzy_image.max() * (fuzzy_image - fuzzy_image.min())).astype(np.uint8)
-    ax.imshow(rf_image, cmap='gray', vmin=0, vmax=255.0)
-    ax.axis('off')
+    if show:
+        fig, ax = plt.subplots(figsize=figsize)
+        rf_image = (255.0 / fuzzy_image.max() * (fuzzy_image - fuzzy_image.min())).astype(np.uint8)
+        ax.imshow(rf_image, cmap='gray', vmin=0, vmax=255.0)
+        ax.axis('off')
 
     output = "fuzzy_{}.png".format(image_file.split('.')[0])
     sio.imsave(output, rf_image)
@@ -55,7 +58,7 @@ def fuzzy_contrast(image_file, figsize=(10, 10)):
     return rf_image
 
 
-def binary_image(image_file, threshold=2, figsize=(10, 10), op_image=False, close=False):
+def binary_image(image_file, threshold=2, figsize=(10, 10), op_image=False, close=False, show=False):
     """
     Create binary image from input image with optional opening step.
     """
@@ -71,9 +74,10 @@ def binary_image(image_file, threshold=2, figsize=(10, 10), op_image=False, clos
     if close is True:
         op_image = closing(op_image, square(3))
 
-    fig, ax = plt.subplots(figsize=figsize)
-    ax.imshow(op_image, cmap='gray')
-    ax.axis('off')
+    if show:
+        fig, ax = plt.subplots(figsize=figsize)
+        ax.imshow(op_image, cmap='gray')
+        ax.axis('off')
 
     op_image = op_image.astype('uint8')*255
     output = "clean_{}.png".format(image_file.split('.')[0])
@@ -82,7 +86,7 @@ def binary_image(image_file, threshold=2, figsize=(10, 10), op_image=False, clos
     return op_image
 
 
-def label_image(image_file, area_thresh=50, figsize=(10, 10)):
+def label_image(image_file, area_thresh=50, figsize=(10, 10), show=False):
     """
     Create label image and calculate region properties.
     """
@@ -106,12 +110,58 @@ def label_image(image_file, area_thresh=50, figsize=(10, 10)):
                 short_image[coord[0], coord[1]] = True
             counter = counter + 1
 
-    fig, ax = plt.subplots(figsize=figsize)
-    ax.imshow(short_image, cmap='gray')
-    ax.axis('off')
+    if show:
+        fig, ax = plt.subplots(figsize=figsize)
+        ax.imshow(short_image, cmap='gray')
+        ax.axis('off')
 
-    short_image = op_image.astype('uint8')*255
+    short_image = short_image.astype('uint8')*255
     output = "short_{}.png".format(image_file.split('.')[0])
     sio.imsave(output, short_image)
 
     return short_image, short_props
+
+
+def skeleton_image(image_file, threshold=50, area_thresh=50, figsize=(10, 10), show=False):
+    # Median filtered image.
+    image0 = sio.imread(image_file)
+    image0 = np.ceil(255* (image0[:, :, 1] / image0[:, :, 1].max())).astype(int)
+    image0 = skimage.filters.median(image0)
+    filt = 'filt_{}.png'.format(image_file.split('.')[0])
+    sio.imsave(filt, image0)
+    
+    #threshold the image
+    binary0 = binary_image(filt, threshold=threshold, close=True, show=False)
+    clean = 'clean_{}'.format(filt)
+    
+    #label image
+    short_image, props = label_image(clean, area_thresh=area_thresh, show=False)
+    short = 'short_{}'.format(clean)
+    short_image = short_image > 1
+    # Skeletonize
+    skeleton0 = skeletonize(short_image)
+    
+    branch_data = csr.summarise(skeleton0)
+    branch_data_short = branch_data
+    
+    #Remove small branches
+    mglia = branch_data['skeleton-id'].max()
+    nbranches = []
+
+    ncount = 0
+    for i in range(1, mglia+1):
+        bcount = branch_data[branch_data['skeleton-id']==i]['skeleton-id'].count()
+        if bcount > 0:
+            ids = branch_data.index[branch_data['skeleton-id']==i].tolist()
+            nbranches.append(bcount)
+            for j in range(0, len(ids)):
+                branch_data_short.drop([ids[j]])
+
+            ncount = ncount + 1
+    if show:
+        fig, ax = plt.subplots(figsize=(10, 10))
+        draw.overlay_euclidean_skeleton_2d(image0, branch_data_short,
+                                           skeleton_color_source='branch-type', axes=ax)
+        plt.savefig('skel_{}'.format(short))
+    
+    return skeleton0, branch_data_short, nbranches
