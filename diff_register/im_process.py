@@ -12,6 +12,16 @@ from skan import csr, draw
 def fuzzy_contrast(image_file, figsize=(10, 10), show=False):
     """
     Increase the contrast of input image by using fuzzy logic.
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+
+    Examples
+    --------
+
     """
 
     # Build fuzzy logic system.
@@ -61,6 +71,16 @@ def fuzzy_contrast(image_file, figsize=(10, 10), show=False):
 def binary_image(image_file, threshold=2, figsize=(10, 10), op_image=False, close=False, show=False):
     """
     Create binary image from input image with optional opening step.
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+
+    Examples
+    --------
+
     """
 
     test_image = sio.imread(image_file)
@@ -89,6 +109,16 @@ def binary_image(image_file, threshold=2, figsize=(10, 10), op_image=False, clos
 def label_image(image_file, area_thresh=50, figsize=(10, 10), show=False):
     """
     Create label image and calculate region properties.
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+
+    Examples
+    --------
+
     """
 
     test_image = sio.imread(image_file)
@@ -123,27 +153,40 @@ def label_image(image_file, area_thresh=50, figsize=(10, 10), show=False):
 
 
 def skeleton_image(image_file, threshold=50, area_thresh=50, figsize=(10, 10), show=False):
+    """
+    Skeletonizes the image and returns properties of each skeleton.
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+
+    Examples
+    --------
+
+    """
     # Median filtered image.
     image0 = sio.imread(image_file)
     image0 = np.ceil(255* (image0[:, :, 1] / image0[:, :, 1].max())).astype(int)
     image0 = skimage.filters.median(image0)
     filt = 'filt_{}.png'.format(image_file.split('.')[0])
     sio.imsave(filt, image0)
-    
+
     #threshold the image
     binary0 = binary_image(filt, threshold=threshold, close=True, show=False)
     clean = 'clean_{}'.format(filt)
-    
+
     #label image
     short_image, props = label_image(clean, area_thresh=area_thresh, show=False)
     short = 'short_{}'.format(clean)
     short_image = short_image > 1
     # Skeletonize
     skeleton0 = skeletonize(short_image)
-    
+
     branch_data = csr.summarise(skeleton0)
     branch_data_short = branch_data
-    
+
     #Remove small branches
     mglia = branch_data['skeleton-id'].max()
     nbranches = []
@@ -163,5 +206,39 @@ def skeleton_image(image_file, threshold=50, area_thresh=50, figsize=(10, 10), s
         draw.overlay_euclidean_skeleton_2d(image0, branch_data_short,
                                            skeleton_color_source='branch-type', axes=ax)
         plt.savefig('skel_{}'.format(short))
-    
+
     return skeleton0, branch_data_short, nbranches
+
+
+def mglia_features(image_file):
+    """
+    Calculates features from input microglia image.
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+
+    Examples
+    --------
+
+    """
+
+    X
+    Y
+    perimeter
+    total_area
+    soma_area
+    eccentricity
+    inertia_tensor
+    label
+    max_intensity
+    mean_intensity
+    moments
+    solidity
+    total_processes
+    avg_p_length
+    main_process
+
+    return mglia_features
