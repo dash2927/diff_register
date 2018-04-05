@@ -8,3 +8,5 @@ gen_api/
 *.png
 *.csv
 *.tif
+*.nd2
+notebooks/.ipynb*
