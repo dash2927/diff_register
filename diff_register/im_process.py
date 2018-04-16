@@ -9,7 +9,7 @@ from skimage.measure import regionprops, label
 from skan import csr, draw
 
 
-def fuzzy_contrast(image_file, figsize=(10, 10), show=False):
+def fuzzy_contrast(folder, image_file, figsize=(10, 10), show=False):
     """
     Increase the contrast of input image by using fuzzy logic.
 
@@ -47,7 +47,8 @@ def fuzzy_contrast(image_file, figsize=(10, 10), show=False):
     F = ctrl.ControlSystemSimulation(Fctrl)
 
     # Apply to image
-    test_image = sio.imread(image_file)
+    fname = '{}/{}'.format(folder, image_file)
+    test_image = sio.imread(fname)
     if image_file.split('.')[1] == 'tif':
         test_image = test_image[:, :, 1] / test_image[:, :, 1].max()
     else:
@@ -63,12 +64,12 @@ def fuzzy_contrast(image_file, figsize=(10, 10), show=False):
         ax.axis('off')
 
     output = "fuzzy_{}.png".format(image_file.split('.')[0])
-    sio.imsave(output, rf_image)
+    sio.imsave(folder+'/'+output, rf_image)
 
     return rf_image
 
 
-def binary_image(image_file, threshold=2, figsize=(10, 10), op_image=False, close=False, show=False):
+def binary_image(folder, image_file, threshold=2, figsize=(10, 10), op_image=False, close=False, show=False):
     """
     Create binary image from input image with optional opening step.
 
@@ -83,7 +84,8 @@ def binary_image(image_file, threshold=2, figsize=(10, 10), op_image=False, clos
 
     """
 
-    test_image = sio.imread(image_file)
+    fname = '{}/{}'.format(folder, image_file)
+    test_image = sio.imread(fname)
     bi_image = test_image > threshold
 
     if open is True:
@@ -101,12 +103,12 @@ def binary_image(image_file, threshold=2, figsize=(10, 10), op_image=False, clos
 
     op_image = op_image.astype('uint8')*255
     output = "clean_{}.png".format(image_file.split('.')[0])
-    sio.imsave(output, op_image)
+    sio.imsave(folder+'/'+output, op_image)
 
     return op_image
 
 
-def label_image(image_file, area_thresh=50, figsize=(10, 10), show=False):
+def label_image(folder, image_file, area_thresh=50, figsize=(10, 10), show=False):
     """
     Create label image and calculate region properties.
 
@@ -121,7 +123,8 @@ def label_image(image_file, area_thresh=50, figsize=(10, 10), show=False):
 
     """
 
-    test_image = sio.imread(image_file)
+    fname = '{}/{}'.format(folder, image_file)
+    test_image = sio.imread(fname)
     labels = label(test_image)
     props = regionprops(labels)
 
@@ -147,12 +150,12 @@ def label_image(image_file, area_thresh=50, figsize=(10, 10), show=False):
 
     short_image = short_image.astype('uint8')*255
     output = "short_{}.png".format(image_file.split('.')[0])
-    sio.imsave(output, short_image)
+    sio.imsave(folder+'/'+output, short_image)
 
     return short_image, short_props
 
 
-def skeleton_image(image_file, threshold=50, area_thresh=50, figsize=(10, 10), show=False):
+def skeleton_image(folder, image_file, threshold=50, area_thresh=50, figsize=(10, 10), show=False):
     """
     Skeletonizes the image and returns properties of each skeleton.
 
@@ -167,18 +170,19 @@ def skeleton_image(image_file, threshold=50, area_thresh=50, figsize=(10, 10), s
 
     """
     # Median filtered image.
-    image0 = sio.imread(image_file)
+    fname = '{}/{}'.format(folder, image_file)
+    image0 = sio.imread(fname)
     image0 = np.ceil(255* (image0[:, :, 1] / image0[:, :, 1].max())).astype(int)
     image0 = skimage.filters.median(image0)
     filt = 'filt_{}.png'.format(image_file.split('.')[0])
-    sio.imsave(filt, image0)
+    sio.imsave(folder+'/'+filt, image0)
 
     #threshold the image
-    binary0 = binary_image(filt, threshold=threshold, close=True, show=False)
+    binary0 = binary_image(folder, filt, threshold=threshold, close=True, show=False)
     clean = 'clean_{}'.format(filt)
 
     #label image
-    short_image, props = label_image(clean, area_thresh=area_thresh, show=False)
+    short_image, props = label_image(folder, clean, area_thresh=area_thresh, show=False)
     short = 'short_{}'.format(clean)
     short_image = short_image > 1
     # Skeletonize
@@ -205,9 +209,9 @@ def skeleton_image(image_file, threshold=50, area_thresh=50, figsize=(10, 10), s
         fig, ax = plt.subplots(figsize=(10, 10))
         draw.overlay_euclidean_skeleton_2d(image0, branch_data_short,
                                            skeleton_color_source='branch-type', axes=ax)
-        plt.savefig('skel_{}'.format(short))
+        plt.savefig('{}/skel_{}'.format(folder, short))
 
-    return skeleton0, branch_data_short, nbranches
+    return skeleton0, branch_data_short, nbranches, short_image, props
 
 
 def mglia_features(image_file):
