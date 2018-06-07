@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 import skfuzzy as fuzz
 from skfuzzy import control as ctrl
 import skimage.io as sio
@@ -69,7 +70,8 @@ def fuzzy_contrast(folder, image_file, figsize=(10, 10), show=False):
     return rf_image
 
 
-def binary_image(folder, image_file, threshold=2, figsize=(10, 10), op_image=False, close=False, show=False):
+def binary_image(folder, image_file, threshold=2, figsize=(10, 10), op_image=False, close=False, show=False,
+                 multichannel=False, channel=0, default_name=True, fname='test.png'):
     """
     Create binary image from input image with optional opening step.
 
@@ -85,7 +87,10 @@ def binary_image(folder, image_file, threshold=2, figsize=(10, 10), op_image=Fal
     """
 
     fname = '{}/{}'.format(folder, image_file)
-    test_image = sio.imread(fname)
+    if multichannel:
+        test_image = sio.imread(fname)[:, :, channel]
+    else:
+        test_image = sio.imread(fname)
     bi_image = test_image > threshold
 
     if open is True:
@@ -102,13 +107,18 @@ def binary_image(folder, image_file, threshold=2, figsize=(10, 10), op_image=Fal
         ax.axis('off')
 
     op_image = op_image.astype('uint8')*255
-    output = "clean_{}.png".format(image_file.split('.')[0])
+    
+    if default_name:
+        output = "clean_{}.png".format(image_file.split('.')[0])
+    else:
+        output = fname
+
     sio.imsave(folder+'/'+output, op_image)
 
     return op_image
 
 
-def label_image(folder, image_file, area_thresh=50, figsize=(10, 10), show=False):
+def label_image(folder, image_file, area_thresh=50, figsize=(10, 10), show=False, default_name=True, fname='test1.png'):
     """
     Create label image and calculate region properties.
 
@@ -149,13 +159,19 @@ def label_image(folder, image_file, area_thresh=50, figsize=(10, 10), show=False
         ax.axis('off')
 
     short_image = short_image.astype('uint8')*255
-    output = "short_{}.png".format(image_file.split('.')[0])
+    
+    if default_name:
+        output = "short_{}.png".format(image_file.split('.')[0])
+    else:
+        output = fname
+
     sio.imsave(folder+'/'+output, short_image)
 
     return short_image, short_props
 
 
-def skeleton_image(folder, image_file, threshold=50, area_thresh=50, figsize=(10, 10), show=False):
+def skeleton_image(folder, image_file, threshold=50, area_thresh=50, figsize=(10, 10), show=False, multichannel=False, channel=0,
+                   disp_binary = True, default_name=True, fname='test2.png'):
     """
     Skeletonizes the image and returns properties of each skeleton.
 
@@ -172,7 +188,10 @@ def skeleton_image(folder, image_file, threshold=50, area_thresh=50, figsize=(10
     # Median filtered image.
     fname = '{}/{}'.format(folder, image_file)
     image0 = sio.imread(fname)
-    image0 = np.ceil(255* (image0[:, :, 1] / image0[:, :, 1].max())).astype(int)
+    if multichannel:
+        image0 = np.ceil(255* (image0[:, :, channel] / image0[:, :, channel].max())).astype(int)
+    else:
+        image0 = np.ceil(255* (image0[:, :] / image0[:, :].max())).astype(int)
     image0 = skimage.filters.median(image0)
     filt = 'filt_{}.png'.format(image_file.split('.')[0])
     sio.imsave(folder+'/'+filt, image0)
@@ -206,43 +225,187 @@ def skeleton_image(folder, image_file, threshold=50, area_thresh=50, figsize=(10
 
             ncount = ncount + 1
     if show:
-        fig, ax = plt.subplots(figsize=(10, 10))
-        draw.overlay_euclidean_skeleton_2d(image0, branch_data_short,
-                                           skeleton_color_source='branch-type', axes=ax)
-        plt.savefig('{}/skel_{}'.format(folder, short))
+        fig, ax = plt.subplots(figsize=figsize)
+        if disp_binary:
+            draw.overlay_euclidean_skeleton_2d(short_image, branch_data_short,
+                                               skeleton_color_source='branch-type', axes=ax)
+        else:
+            draw.overlay_euclidean_skeleton_2d(image0, branch_data_short,
+                                               skeleton_color_source='branch-type', axes=ax)
+        
+    if default_name:
+        output = 'skel_{}'.format(short)
+    else:
+        output = fname
+    plt.savefig('{}/{}'.format(folder, output))
 
     return skeleton0, branch_data_short, nbranches, short_image, props
 
 
-def mglia_features(image_file):
+def mglia_features(props, branch_data_short, convert=False, umppx=1):
     """
-    Calculates features from input microglia image.
-
-    Parameters
-    ----------
-
-    Returns
-    -------
-
-    Examples
-    --------
-
+    Note: raises error if skeleton is missing from any cell in the binary image.
     """
+    
+    X = np.zeros((len(props)))
+    Y = np.zeros((len(props)))
+    perimeter = np.zeros((len(props)))
+    areas = np.zeros((len(props)))
+    eccentricity = np.zeros((len(props)))
+    inertia_tensor = [0]*len(props)
+    label = [0]*len(props)
+    max_intensity = np.zeros((len(props)))
+    mean_intensity = np.zeros((len(props)))
+    moments = [0]*len(props)
+    solidity = np.zeros((len(props)))
+    #total_processes = np.zeros((len(props)))
+    #avg_p_length = np.zeros((len(props)))
+    #main_process = np.zeros((len(props)))
 
-    X
-    Y
-    perimeter
-    total_area
-    soma_area
-    eccentricity
-    inertia_tensor
-    label
-    max_intensity
-    mean_intensity
-    moments
-    solidity
-    total_processes
-    avg_p_length
-    main_process
+    #properties that can be found from sklearn.measure.regionprops
+    counter = 0
+    for item in props:
+        X[counter] = item.centroid[0]
+        Y[counter] = item.centroid[1]
+        perimeter[counter] = item.perimeter
+        areas[counter] = item.area
+        eccentricity[counter] = item.eccentricity
+        inertia_tensor[counter] = item.inertia_tensor
+        label[counter] = item.label
+        #max_intensity[counter] = item.max_intensity
+        #mean_intensity[counter] = item.mean_intensity
+        moments[counter] = item.moments
+        solidity[counter] = item.solidity
+        counter = counter + 1
+        
+    #properties associated with processes as found from skan
+    mglia = branch_data_short['skeleton-id'].max()
+    nbranches = []
+    avg_p_length = []
+    main_process = []
+    
+    xs = []
+    ys = []
 
-    return mglia_features
+    ncount = 0
+    for i in branch_data_short['skeleton-id'].unique():
+        bcount = branch_data_short[branch_data_short['skeleton-id']==i]['skeleton-id'].count()
+        bavg = np.mean(branch_data_short[branch_data_short['skeleton-id']==i]['branch-distance'])
+        blong = np.max(branch_data_short[branch_data_short['skeleton-id']==i]['branch-distance'])
+        xcoord = np.mean([np.mean(branch_data_short[branch_data_short['skeleton-id']==i]['img-coord-0-0']), 
+                         np.mean(branch_data_short[branch_data_short['skeleton-id']==i]['img-coord-1-0'])])
+        xs.append(xcoord)
+        ycoord = np.mean([np.mean(branch_data_short[branch_data_short['skeleton-id']==i]['img-coord-0-1']), 
+                         np.mean(branch_data_short[branch_data_short['skeleton-id']==i]['img-coord-1-1'])])
+        ys.append(ycoord)
+        nbranches.append(bcount)
+        avg_p_length.append(bavg)
+        main_process.append(blong)
+        
+    nbranches_ord = [0]*len(nbranches)
+    avg_p_length_ord = [0]*len(nbranches)
+    main_process_ord = [0]*len(nbranches)
+
+    for i in range(0, len(xs)):
+        #print(xs[i], ys[i])
+        skel_id = i
+        min_function = np.square(xs[i] - X)+np.square(ys[i] - Y)
+        mglia_id = np.argmin(min_function)
+        nbranches_ord[mglia_id] = nbranches[skel_id]
+        avg_p_length_ord[mglia_id] = avg_p_length[skel_id]
+        main_process_ord[mglia_id] = main_process[skel_id]
+        #print(mglia_id)
+        #print(np.min(min_function))
+    
+    if convert:
+        factor = umppx
+    else:
+        factor = 1
+
+    features = pd.DataFrame({ 'X' : X*factor,
+                              'Y' : Y*factor,
+                              'perimeter' : perimeter*factor,
+                              'area' : areas*factor*factor,
+                              'eccentricity' : eccentricity,
+                              'inertia_tensor' : inertia_tensor,
+                              'label' : label,
+                              #'max intensity' : max_intensity,
+                              #'mean intensity' : mean_intensity,
+                              'moments' : moments,
+                              'solidity' : solidity,
+                              'total_branches' : nbranches_ord,
+                              'average_branch' : [x*factor for x in avg_p_length_ord],
+                              'main_branch' : [x*factor for x in main_process_ord]
+                            })
+    
+    return features
+
+
+def features_hist(features, feature, bin_size=100, bin_range=5000):
+    xlabel = "Microglia {} (pixels)".format(feature)
+    ylabel = "Count"
+
+    nbins = bin_range/bin_size + 1
+    test_bins = np.linspace(0, bin_range, nbins)
+    dist = features[feature]
+    
+    histogram, test_bins = np.histogram(dist, bins=test_bins)
+
+    # Plot_general_histogram_code
+    avg = np.mean(dist)
+    fig = plt.figure(figsize=(16, 6))
+
+    plt.rc('axes', linewidth=2)
+    plot = histogram
+    bins = test_bins
+    width = 0.7 * (bins[1] - bins[0])
+    center = (bins[:-1] + bins[1:])/2
+    bar = plt.bar(center, plot, align='center', width=width)
+    plt.axvline(avg)
+    plt.xlabel(xlabel, fontsize=30)
+    plt.ylabel(ylabel, fontsize=30)
+    plt.tick_params(axis='both', which='major', labelsize=20)
+    
+    plt.show()
+
+    
+def read_xmlpoints(xmlfile, converttopix = True, umppx=0.62, offset=(17000, -1460)):
+    tree = et.parse(xmlfile)
+    root = tree.getroot()
+
+    y = []
+    x = []
+    xmlpoints = []
+    counter = 0
+    
+    for point in root[0]:
+        if counter > 1:
+            x = float(point[2].attrib['value'])
+            y = float(point[3].attrib['value'])
+            if converttopix:
+                xmlpoints.append(((x-offset[0])/umppx,(y-offset[1])/umppx))
+            else:
+                xmlpoints.append((x, y))
+        counter = counter + 1
+
+    return xmlpoints
+
+
+def crop_to_videodims(cell_image, multichannel = False, vidpoint=(600, 600), defaultdims=True, dim=512, save=True,
+                      fname='test.tif'):
+    
+    if defaultdims:
+        ndim = 512
+    else:
+        ndim = dim
+
+    if not multichannel:
+        subim = cell_image[int(vidpoint[0]-ndim/2):int(vidpoint[0]+ndim/2), int(vidpoint[1]-ndim/2):int(vidpoint[1]+ndim/2)]
+
+    if save:
+        sio.imsave(fname, subim)
+        
+    return subim
+
+
+
