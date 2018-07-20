@@ -1,5 +1,5 @@
 import numpy as np
-
+import xml.etree.ElementTree as et
 import skimage.io as sio
 from skimage.measure import ransac
 from skimage.feature import match_descriptors, ORB
@@ -9,6 +9,57 @@ from skimage.filters import gaussian
 from dipy.viz.regtools import overlay_images
 from dipy.align.imaffine import (MutualInformationMetric,
                                  AffineRegistration)
+
+
+def read_xmlpoints(xmlfile, converttopix = True, umppx=0.62, offset=(17000, -1460)):
+    """
+    Parameters
+    ----------
+    
+    xmlfile: XML file containing locations at which trajectory videos were collected.
+    converttopix: User indicates whether points should be converted to pixels within
+        the cell tilescan image, or remain in microns.
+    umppx: microns per pixel. Pixel density of cell tilescan image.
+    offset: 
+    
+    """
+    tree = et.parse(xmlfile)
+    root = tree.getroot()
+
+    y = []
+    x = []
+    xmlpoints = []
+    counter = 0
+    
+    for point in root[0]:
+        if counter > 1:
+            x = float(point[2].attrib['value'])
+            y = float(point[3].attrib['value'])
+            if converttopix:
+                xmlpoints.append(((x-offset[0])/umppx,(y-offset[1])/umppx))
+            else:
+                xmlpoints.append((x, y))
+        counter = counter + 1
+
+    return xmlpoints
+
+
+def crop_to_videodims(cell_image, multichannel = False, vidpoint=(600, 600), defaultdims=True, dim=512, save=True,
+                      fname='test.tif'):
+    
+    if defaultdims:
+        ndim = 512
+    else:
+        ndim = dim
+
+    if not multichannel:
+        subim = cell_image[int(vidpoint[0]-ndim/2):int(vidpoint[0]+ndim/2), int(vidpoint[1]-ndim/2):int(vidpoint[1]+ndim/2)]
+
+    if save:
+        sio.imsave(fname, subim)
+        
+    return subim
+
 
 def downsample(image, ratio=10, imread = True, imsave=True, colorcol = 0):
     """
