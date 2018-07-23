@@ -11,20 +11,39 @@ from dipy.align.imaffine import (MutualInformationMetric,
                                  AffineRegistration)
 
 
-def read_xmlpoints(xmlfile, converttopix = True, umppx=0.62, offset=(17000, -1460)):
+def read_xmlpoints(xmlfile, cell_image, converttopix = True, umppx=0.62, offset=(17000, -1460)):
     """
+    Read points saved from Nikon multipoints xml file.
+    
     Parameters
     ----------
-    
-    xmlfile: XML file containing locations at which trajectory videos were collected.
-    converttopix: User indicates whether points should be converted to pixels within
+    xmlfile : string
+        XML file containing locations at which trajectory videos were collected.
+        converttopix: User indicates whether points should be converted to pixels within
         the cell tilescan image, or remain in microns.
-    umppx: microns per pixel. Pixel density of cell tilescan image.
-    offset: 
+    cell_image : string
+        TIFF file of tile scan image.
+    converttopix : Boolean
+        Specify whether coordinates should be converted from microns to pixels.
+    umppx: float 
+        Microns per pixel. Pixel density of cell tilescan image.
+    offset: list of integers or floats
+        Coordinates (in microns) of the upper right corner of the input tilescan image.
     
+    Returns
+    -------
+    subim : 2d numpy array
+        Tiled image extracted from cell_image at points specified by vidpoints and dimensions
+        specified by dim.
+
+    Examples
+    --------
     """
     tree = et.parse(xmlfile)
     root = tree.getroot()
+    
+    tilescan = cell_image
+    tiled = sio.imread(tilescan)
 
     y = []
     x = []
@@ -40,21 +59,55 @@ def read_xmlpoints(xmlfile, converttopix = True, umppx=0.62, offset=(17000, -146
             else:
                 xmlpoints.append((x, y))
         counter = counter + 1
-
-    return xmlpoints
-
-
-def crop_to_videodims(cell_image, multichannel = False, vidpoint=(600, 600), defaultdims=True, dim=512, save=True,
-                      fname='test.tif'):
     
-    if defaultdims:
-        ndim = 512
-    else:
-        ndim = dim
+    xmlmod = []
+    for point in xmlpoints:
+        xmlmod.append((tiled.shape[0]-point[0], point[1]))
+
+    return xmlmod
+
+
+def crop_to_videodims(cell_image, multichannel = False, vidpoint=(600, 600), dim=512, save=True,
+                      fname='test.tif', correction=(0, 0)):
+    """
+    Registration function used to crop sub-images from large tile-scanned images collected via confocal
+    or fluorescent microsopy at specified points.
+
+    Parameters
+    ----------
+    cell_image : 2d numpy array
+        Tiled large image to be cut.
+    multichannel : Boolean
+        Specify if image has multiple channels. Currently only works if set to False.
+    vidpoint : list of integers or floats
+        Point in image at which to perform crops. Each point is at the center of each image.
+    dim : int
+        Dimension of desired out put image e.g. 512 for a 512 by 512 pixel image.
+    save : Boolean
+        Specify whether user wants to save image to harddrive.
+    fname : string
+        Name of output file
+    correction: list of integers or floats
+        Optional xy correction coordinates if alignment doesn't appear to be perfect
+    
+    Returns
+    -------
+    subim : 2d numpy array
+        Tiled image extracted from cell_image at points specified by vidpoints and dimensions
+        specified by dim.
+
+    Examples
+    --------
+
+    """
+
+
+    ndim = dim
 
     if not multichannel:
-        subim = cell_image[int(vidpoint[0]-ndim/2):int(vidpoint[0]+ndim/2), int(vidpoint[1]-ndim/2):int(vidpoint[1]+ndim/2)]
-
+        subim = cell_image[int(vidpoint[1]-ndim/2+correction[1]):int(vidpoint[1]+ndim/2+correction[1]),
+                           int(vidpoint[0]-ndim/2+correction[0]):int(vidpoint[0]+ndim/2+correction[0])]
+        #subim = cell_image[int(vidpoint[1]-ndim/2):int(vidpoint[1]+ndim/2), int(vidpoint[0]-ndim-20):int(vidpoint[0])-20]
     if save:
         sio.imsave(fname, subim)
         
