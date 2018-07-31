@@ -104,9 +104,13 @@ def crop_to_videodims(cell_image, multichannel = False, vidpoint=(600, 600), dim
 
     ndim = dim
 
+    lox = int(vidpoint[1] - ndim/2+correction[1])
+    hix = int(vidpoint[1] + ndim/2+correction[1])
+    loy = int(vidpoint[0] - ndim/2+correction[0])
+    hiy = int(vidpoint[0] + ndim/2+correction[0])
+    
     if not multichannel:
-        subim = cell_image[int(vidpoint[1]-ndim/2+correction[1]):int(vidpoint[1]+ndim/2+correction[1]),
-                           int(vidpoint[0]-ndim/2+correction[0]):int(vidpoint[0]+ndim/2+correction[0])]
+        subim = cell_image[lox:hix, loy: hiy]
         #subim = cell_image[int(vidpoint[1]-ndim/2):int(vidpoint[1]+ndim/2), int(vidpoint[0]-ndim-20):int(vidpoint[0])-20]
     if save:
         sio.imsave(fname, subim)
