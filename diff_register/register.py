@@ -68,7 +68,7 @@ def read_xmlpoints(xmlfile, cell_image, converttopix = True, umppx=0.62, offset=
 
 
 def crop_to_videodims(cell_image, multichannel = False, vidpoint=(600, 600), dim=512, save=True,
-                      fname='test.tif', correction=(0, 0)):
+                      fname='test.tif', correction=(0, 0), dim_traj=2048):
     """
     Registration function used to crop sub-images from large tile-scanned images collected via confocal
     or fluorescent microsopy at specified points.
@@ -112,10 +112,11 @@ def crop_to_videodims(cell_image, multichannel = False, vidpoint=(600, 600), dim
     if not multichannel:
         subim = cell_image[lox:hix, loy: hiy]
         #subim = cell_image[int(vidpoint[1]-ndim/2):int(vidpoint[1]+ndim/2), int(vidpoint[0]-ndim-20):int(vidpoint[0])-20]
-    if save:
-        sio.imsave(fname, subim)
-        
-    return subim
+        subim_new = tf.resize(subim, (dim_traj, dim_traj))
+        if save:
+            sio.imsave(fname, subim_new)
+    
+    return subim_new
 
 
 def downsample(image, ratio=10, imread = True, imsave=True, colorcol = 0):

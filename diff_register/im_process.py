@@ -118,6 +118,83 @@ def binary_image(folder, image_file, threshold=2, figsize=(10, 10), op_image=Fal
     return op_image
 
 
+def clean_image(folder, image_file, threshold=2, figsize=(10, 10), op_image=False, close=False, show=False,
+                area_thresh=50, multichannel=False, channel=0, default_name=True, fname='test.png'):
+    """
+    Create binary image from input image with optional opening step.
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+
+    Examples
+    --------
+
+    """
+
+    fname = '{}/{}'.format(folder, image_file)
+    if multichannel:
+        test_image = sio.imread(fname)[:, :, channel]
+    else:
+        test_image = sio.imread(fname)
+    bi_image = test_image > threshold
+
+    if open is True:
+        op_image = opening(bi_image, square(3))
+    else:
+        op_image = bi_image
+
+    if close is True:
+        op_image = closing(op_image, square(3))
+
+    op_image = op_image.astype('uint8')*255
+    
+#     if default_name:
+#         output = "clean_{}.png".format(image_file.split('.')[0])
+#     else:
+#         output = fname
+
+#     sio.imsave(folder+'/'+output, op_image)
+    
+    ##Labelling and cleaning up image.
+    test_image = op_image
+    labels = label(test_image)
+    props = regionprops(labels)
+
+    short_image = np.zeros(labels.shape)
+    counter = 0
+    skip = 0
+    short_props = []
+    for i in range(0, len(props)):
+        area = props[i]['area']
+        if area < area_thresh:
+            skip = skip + 1
+        else:
+            short_props.append(props[i])
+            test_coords = props[i]['coords'].tolist()
+            for coord in test_coords:
+                short_image[coord[0], coord[1]] = True
+            counter = counter + 1
+
+    if show:
+        fig, ax = plt.subplots(figsize=figsize)
+        ax.imshow(short_image, cmap='gray')
+        ax.axis('off')
+
+    short_image = short_image.astype('uint8')*255
+    
+    if default_name:
+        output = "short_{}.png".format(image_file.split('.')[0])
+    else:
+        output = fname
+
+    sio.imsave(folder+'/'+output, short_image)
+
+    return short_image, short_props
+
+
 def label_image(folder, image_file, area_thresh=50, figsize=(10, 10), show=False, default_name=True, fname='test1.png'):
     """
     Create label image and calculate region properties.
