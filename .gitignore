@@ -9,4 +9,5 @@ gen_api/
 *.csv
 *.tif
 *.nd2
+*.xml
 notebooks/.ipynb*
