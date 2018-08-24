@@ -2,23 +2,26 @@ import numpy as np
 
 
 def triangmf(z, a, b, c):
-    """
-
-    Computes a fuzzy membership function with a triangular shape.
+    """Computes a fuzzy membership function with a triangular shape.
 
     Adapted from Digital Image Processing Using MATLAB (2nd Ed.) by R.C.
     Gonzalez, R. E. Woods, and S. L. Eddins.
 
-    Inputs
-    ------
-    z: input variable, can be a vector of any length.
-    a: scalar parameter, such that b >= a
-    b: scalar parameter, such that b >= a, c >= b
-    c: scalar parameter, such that c >= b
+    Parameters
+    ----------
+    z : numpy.ndarray
+        Input variable, can be a vector of any length.
+    a : int or float
+        Scalar parameter, such that b >= a
+    b : int or float
+        Scalar parameter, such that b >= a, c >= b
+    c : int or float
+        Scalar parameter, such that c >= b
 
     Returns
     -------
-    mu: fuzzy membership function
+    mu : numpy.ndarray
+        Fuzzy membership function
 
     Examples
     --------
@@ -35,24 +38,28 @@ def triangmf(z, a, b, c):
 
 
 def trapezmf(z, a, b, c, d):
-    """
-
-    Computes a fuzzy membership function with a trapezoidal shape.
+    """Computes a fuzzy membership function with a trapezoidal shape.
 
     Adapted from Digital Image Processing Using MATLAB (2nd Ed.) by R.C.
     Gonzalez, R. E. Woods, and S. L. Eddins.
 
-    Inputs
-    ------
-    z: input variable, can be a vector of any length.
-    a: scalar parameter, such that b >= a
-    b: scalar parameter, such that b >= a, c >= b
-    c: scalar parameter, such that c <= d
-    d: scalar parameter
+    Parameters
+    ----------
+    z : numpy.ndarray
+        Input variable, can be a vector of any length.
+    a : int or float
+        Scalar parameter, such that b >= a
+    b : int or float
+        Scalar parameter, such that b >= a, c >= b
+    c : int or float
+        Scalar parameter, such that c <= d
+    d : int or float
+        Scalar parameter
 
     Returns
     -------
-    mu: fuzzy membership function
+    mu : numpy.ndarray
+        Fuzzy membership function
 
     Examples
     --------
@@ -72,22 +79,24 @@ def trapezmf(z, a, b, c, d):
 
 
 def sigmamf(z, a, b):
-    """
-
-    Computes the sigma fuzzy membership function.
+    """Computes the sigma fuzzy membership function.
 
     Adapted from Digital Image Processing Using MATLAB (2nd Ed.) by R.C.
     Gonzalez, R. E. Woods, and S. L. Eddins.
 
-    Inputs
-    ------
-    z: input variable, can be a vector of any length.
-    a: scalar parameter, such that b >= a
-    b: scalar parameter, such that b >= a, c >= b
+    Parameters
+    ----------
+    z : numpy.ndarray
+        Input variable, can be a vector of any length.
+    a : int or float
+        Scalar parameter, such that b >= a
+    b : int or float
+        Scalar parameter, such that b >= a, c >= b
 
     Returns
     -------
-    mu: fuzzy membership function
+    mu : numpy.ndarray
+        fuzzy membership function
 
     Examples
     --------
@@ -100,22 +109,24 @@ def sigmamf(z, a, b):
 
 
 def smf(z, a, b):
-    """
-
-    Computes an s-shaped fuzzy membership function.
+    """Computes an s-shaped fuzzy membership function.
 
     Adapted from Digital Image Processing Using MATLAB (2nd Ed.) by R.C.
     Gonzalez, R. E. Woods, and S. L. Eddins.
 
-    Inputs
-    ------
-    z: input variable, can be a vector of any length.
-    a: scalar parameter, such that b >= a
-    b: scalar parameter, such that b >= a, c >= b
+    Parameters
+    ----------
+    z : int or float
+        Input variable, can be a vector of any length.
+    a : int or float
+        Scalar parameter, such that b >= a
+    b : int or float
+        Scalar parameter, such that b >= a, c >= b
 
     Returns
     -------
-    mu: fuzzy membership function
+    mu : int or float
+        Fuzzy membership function
 
     Examples
     --------
@@ -136,22 +147,24 @@ def smf(z, a, b):
 
 
 def bellmf(z, a, b):
-    """
-
-    Computes the bell-shaped fuzzy membership function.
+    """Computes the bell-shaped fuzzy membership function.
 
     Adapted from Digital Image Processing Using MATLAB (2nd Ed.) by R.C.
     Gonzalez, R. E. Woods, and S. L. Eddins.
 
-    Inputs
-    ------
-    z: input variable, can be a vector of any length.
-    a: scalar parameter, such that b >= a
-    b: scalar parameter, such that b >= a
+    Parameters
+    ----------
+    z : numpy.ndarray
+        Input variable, can be a vector of any length.
+    a : int or float
+        Scalar parameter, such that b >= a
+    b : int or float
+        Scalar parameter, such that b >= a
 
     Returns
     -------
-    mu: fuzzy membership function
+    mu : numpy.ndarray
+        Fuzzy membership function
 
     Examples
     --------
@@ -169,22 +182,24 @@ def bellmf(z, a, b):
 
 
 def truncgaussmf(z, a, b, s):
-    """
-
-    Computes a truncated Gaussian fuzzy membership function.
+    """Computes a truncated Gaussian fuzzy membership function.
 
     Adapted from Digital Image Processing Using MATLAB (2nd Ed.) by R.C.
     Gonzalez, R. E. Woods, and S. L. Eddins.
 
-    Inputs
-    ------
-    z: input variable, can be a vector of any length.
-    a: scalar parameter, such that b >= a
-    b: scalar parameter, such that b >= a
+    Parameters
+    ----------
+    z : numpy.ndarray
+        Input variable, can be a vector of any length.
+    a : int or float
+        Scalar parameter, such that b >= a
+    b : int or float
+        Scalar parameter, such that b >= a
 
     Returns
     -------
-    mu: fuzzy membership function
+    mu : numpy.ndarray
+        Fuzzy membership function
 
     Examples
     --------
@@ -201,20 +216,20 @@ def truncgaussmf(z, a, b, s):
 
 
 def zeromf(z):
-    """
-
-    Compus a zero memberoship function.
+    """Computes a zero membership function.
 
     Adapted from Digital Image Processing Using MATLAB (2nd Ed.) by R.C.
     Gonzalez, R. E. Woods, and S. L. Eddins.
 
-    Inputs
-    ------
-    z: input variable, can be a vector of any length.
+    Parameters
+    ----------
+    z : numpy.ndarray
+        Input variable, can be a vector of any length.
 
     Returns
     -------
-    mu: fuzzy membership function
+    mu : numpy.ndarray
+        Fuzzy membership function
 
     Examples
     --------
@@ -227,20 +242,20 @@ def zeromf(z):
 
 
 def onemf(z):
-    """
-
-    Compus a one memberoship function.
+    """Compus a one memberoship function.
 
     Adapted from Digital Image Processing Using MATLAB (2nd Ed.) by R.C.
     Gonzalez, R. E. Woods, and S. L. Eddins.
 
-    Inputs
-    ------
-    z: input variable, can be a vector of any length.
+    Parameters
+    ----------
+    z : numpy.ndarray
+        Input variable, can be a vector of any length.
 
     Returns
     -------
-    mu: fuzzy membership function
+    mu : numpy.ndarray
+        Fuzzy membership function
 
     Examples
     --------
@@ -253,23 +268,24 @@ def onemf(z):
 
 
 def lambdafcns(inmf, op=lambda x: min(x)):
-    """
-    Creates a set of lambda functions (rule strength functions) corresponding to
-    a set of fuzzy rules.
+    """Creates a set of lambda functions (rule strength functions)
+    corresponding to a set of fuzzy rules.
 
-    Inputs
-    ------
-    inmf: M by N matrix of input membership function handle, where M is the
+    Parameters
+    ----------
+    inmf : numpy.ndarray
+        M by N matrix of input membership function handle, where M is the
         number of rules, and N is the number of fuzzy input systems. inmf(i, j)
         is the input membership function applied by the i-th rule to the j-th
         input.
 
-    op: a function handle used to combine the antecedents for each rule.  op can
+    op : function
+        a function handle used to combine the antecedents for each rule.  op can
         be either
 
     Returns
     -------
-    L: array of function handles
+    L : array of function handles
 
     Examples
     --------
@@ -285,8 +301,8 @@ def lambdafcns(inmf, op=lambda x: min(x)):
             if counter == 0:
                 Z = num
 
-            # initialize lambda as the output of the first memberoship function of
-            # the k-th rule.
+            # initialize lambda as the output of the first memberoship function
+            # of the k-th rule.
             memberfcn = inmf[i][0]
             lda = memberfcn(Z[0])
             if counter > 0:
@@ -307,22 +323,24 @@ def lambdafcns(inmf, op=lambda x: min(x)):
 
 
 def implfcns(L, outmf, args):
-    """
+    """Creates implication functions from input lambda functions
+
     Creates a set of implication functions from a set of lambda functions L, a
     set of output member functions outmf, and a set of fuzzy system inputs
     args = [Z1, Z2, ..., ZN].
 
-    Inputs
-    ------
-    L: a list of lists of rule-strength function handles as returned by
-        lambdafcns
-    outmf: a list of lists of output membership functions.  The number of
-        elements of outmf can be either...
+    Parameters
+    ----------
+    L : list of list of function
+        Rule-strength function handles as returned by lambdafcns
+    outmf : list of list of function
+        Output membership functions.  The number of elements of outmf can be
+        either...
 
     Returns
     -------
-    Q: a list of lists of implication function handles
-
+    Q : list of list of function
+        Implication function handles
 
     """
 
@@ -357,16 +375,17 @@ def implfcns(L, outmf, args):
 
 
 def aggfcn(Q):
-    """
-    Creates an aggregation function Qa from a set of implication functions Q.
+    """Creates an aggregation function Qa from a set of implication functions Q.
 
-    Inputs
-    ------
-    Q: list of lists of function handles as returned by implfcns
+    Parameters
+    ----------
+    Q : list of list of function
+        Function handles as returned by implfcns
 
     Returns
     -------
-    Qa: a function handle that can be called with a single input V.
+    Qa : function
+        Function handle that can be called with a single input V.
 
     Examples
     --------
@@ -384,18 +403,21 @@ def aggfcn(Q):
 
 
 def defuzzify(Qa, vrange):
-    """
-    Transforms the aggregation function Qa into a fuzzy result using the
-    center-of-gravity method.
+    """Transforms the aggregation function Qa into a fuzzy result using the
+    center-of-gravity method
 
-    Inputs
-    ------
-    Qa: a function handle as returned by aggfcn.
-    vrange: two-element vector specifying the range of input values for Qa.
+    Parameters
+    ----------
+    Qa : function
+        A function handle as returned by aggfcn.
+    vrange : numpy.ndarray
+        Two-element vector specifying the range of input values for Qa.
 
     Returns
     -------
-    out: scalar result
+    out : float
+        Scalar result
+
     """
 
     v1 = vrange[0]
@@ -413,26 +435,28 @@ def defuzzify(Qa, vrange):
 
 
 def fuzzysysfcn(inmf, outmf, vrange, op=lambda x: min(x)):
-    """
-    Creates a fuzzy system function F, corresponding to a set of rules and
-    output membership functions.
+    """Creates a fuzzy system function F, corresponding to a set of rules and
+    output membership functions
 
-    Inputs
-    ------
-    inmf: M by N list of lists, M is the number of rules, N is the number of
+    Parameters
+    ----------
+    inmf : list of list of function
+        M by N list of lists, M is the number of rules, N is the number of
         fuzzy system inputs.
-    outmf: list of lists containing output membership functions. len(outmf) can
-        be either M or M+1.
-    vrange: two-element vector specifying the valid range of input values for
+    outmf : list of list of function
+        Contains output membership functions. len(outmf) can be either M or M+1.
+    vrange : numpy.ndarray
+        Two-element vector specifying the valid range of input values for
         the output membership functions.
-    op: a function handle specifying how to combine the antecedents for each
+    op : function
+        A function handle specifying how to combine the antecedents for each
         rule.  Can be either min or max.
 
     Returns
     -------
-    F: a function handle that computes the fuzzy system's output, given a set of
-        inputs, using the syntax...
-
+    F : function
+        A function handle that computes the fuzzy system's output, given a set
+        of inputs, using the syntax...
 
     """
     F = 1

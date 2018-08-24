@@ -1,24 +1,33 @@
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 import skfuzzy as fuzz
 from skfuzzy import control as ctrl
-import skimage.io as sio
-import matplotlib.pyplot as plt
 import skimage
+import skimage.io as sio
 from skimage.morphology import square, opening, closing, skeletonize
 from skimage.measure import regionprops, label
 from skan import csr, draw
 
 
 def fuzzy_contrast(folder, image_file, figsize=(10, 10), show=False):
-    """
-    Increase the contrast of input image by using fuzzy logic.
+    """Increase the contrast of input image by using fuzzy logic.
 
     Parameters
     ----------
+    folder : string
+        Directory containing image_file
+    image_file : string
+        Filename of image to be analyzed
+    figsize : tuple of int or float
+        Size of output image
+    show : bool
+        If True, outputs image to Jupyter notebook display.
 
     Returns
     -------
+    rf_image : numpy.ndarray
+        Output image
 
     Examples
     --------
@@ -70,16 +79,43 @@ def fuzzy_contrast(folder, image_file, figsize=(10, 10), show=False):
     return rf_image
 
 
-def binary_image(folder, image_file, threshold=2, figsize=(10, 10), op_image=False, close=False, show=False,
-                 multichannel=False, channel=0, default_name=True, fname='test.png'):
-    """
-    Create binary image from input image with optional opening step.
+def binary_image(folder, image_file, threshold=2, figsize=(10, 10),
+                 op_image=False, close=False, show=False, multichannel=False,
+                 channel=0, default_name=True, fname='test.png'):
+    """Create binary image from input image with optional opening step.
 
     Parameters
     ----------
+    folder : string
+        Directory containing image_file
+    image_file : string
+        Filename of image to be analyzed.
+    threshold : int or float
+        Intensity threshold of binary image.
+    figsize : tuple of int or float
+        Size of output figure
+    op_image : bool
+        If True, opens binary image by performing a dilation followed by
+        an erosion.
+    close : bool
+        If True, closes binary image by performing an erosion followed by a
+        dilation.
+    show : bool
+        If True, outputs image to Jupyter notebook display
+    multichannel : bool
+        If True, reads in image as multichannel image
+    channel : int
+        Specifies which channel to read in as image from multichannel image
+    default_name : bool
+        If True, output filename will append 'clean' to beginning of original
+        filename
+    fname : string
+        If default_name is set to False, filename will be named fname
 
     Returns
     -------
+    op_image : numpy.ndarray
+        Output image
 
     Examples
     --------
@@ -107,7 +143,7 @@ def binary_image(folder, image_file, threshold=2, figsize=(10, 10), op_image=Fal
         ax.axis('off')
 
     op_image = op_image.astype('uint8')*255
-    
+
     if default_name:
         output = "clean_{}.png".format(image_file.split('.')[0])
     else:
@@ -150,14 +186,14 @@ def clean_image(folder, image_file, threshold=2, figsize=(10, 10), op_image=Fals
         op_image = closing(op_image, square(3))
 
     op_image = op_image.astype('uint8')*255
-    
+
 #     if default_name:
 #         output = "clean_{}.png".format(image_file.split('.')[0])
 #     else:
 #         output = fname
 
 #     sio.imsave(folder+'/'+output, op_image)
-    
+
     ##Labelling and cleaning up image.
     test_image = op_image
     labels = label(test_image)
@@ -184,7 +220,7 @@ def clean_image(folder, image_file, threshold=2, figsize=(10, 10), op_image=Fals
         ax.axis('off')
 
     short_image = short_image.astype('uint8')*255
-    
+
     if default_name:
         output = "short_{}.png".format(image_file.split('.')[0])
     else:
@@ -236,7 +272,7 @@ def label_image(folder, image_file, area_thresh=50, figsize=(10, 10), show=False
         ax.axis('off')
 
     short_image = short_image.astype('uint8')*255
-    
+
     if default_name:
         output = "short_{}.png".format(image_file.split('.')[0])
     else:
@@ -248,12 +284,36 @@ def label_image(folder, image_file, area_thresh=50, figsize=(10, 10), show=False
 
 
 def skeleton_image(folder, image_file, threshold=50, area_thresh=50, figsize=(10, 10), show=False, multichannel=False, channel=0,
-                   disp_binary = True, default_name=True, fname='test2.png'):
-    """
-    Skeletonizes the image and returns properties of each skeleton.
+                   disp_binary=True, default_name=True, fname='test2.png'):
+    """Skeletonizes the image and returns properties of each skeleton.
+
+    Composite function of above functions
 
     Parameters
     ----------
+    folder : string
+        Directory containing image_file
+    image_file : string
+        Filename of image to be analyzed
+    threshold : int or float
+        Intensity threshold level for threshold.
+    area_thresh : int or float
+        Size cutoff level to remove small objects
+    figsize : tuple of int or float
+        Size out output figure
+    show : bool
+        If True, prints image to Jupyter notebook
+    multichannel : bool
+        If True, reads in image as multichannel image
+    channel : int
+        If multichannel is True, reads in image corresponding to this channel in
+        file.
+    disp_binary: bool
+        If True, prints binary image instead of raw image
+    default_name : bool
+        If True, names output image by appending original filename with 'skel'
+    fname : string
+        If default_name is False, output filename is named fname
 
     Returns
     -------
@@ -262,23 +322,29 @@ def skeleton_image(folder, image_file, threshold=50, area_thresh=50, figsize=(10
     --------
 
     """
+
     # Median filtered image.
     fname = '{}/{}'.format(folder, image_file)
     image0 = sio.imread(fname)
     if multichannel:
-        image0 = np.ceil(255* (image0[:, :, channel] / image0[:, :, channel].max())).astype(int)
+        image0 = np.ceil(255 * (image0[:, :, channel
+                                       ] / image0[:, :, channel
+                                                  ].max())).astype(int)
     else:
-        image0 = np.ceil(255* (image0[:, :] / image0[:, :].max())).astype(int)
+        image0 = np.ceil(255 * (image0[:, :] / image0[:, :].max())).astype(int)
+
     image0 = skimage.filters.median(image0)
     filt = 'filt_{}.png'.format(image_file.split('.')[0])
     sio.imsave(folder+'/'+filt, image0)
 
-    #threshold the image
-    binary0 = binary_image(folder, filt, threshold=threshold, close=True, show=False)
+    # threshold the image
+    binary0 = binary_image(folder, filt, threshold=threshold,
+                           close=True, show=False)
     clean = 'clean_{}'.format(filt)
 
-    #label image
-    short_image, props = label_image(folder, clean, area_thresh=area_thresh, show=False)
+    # label image
+    short_image, props = label_image(folder, clean, area_thresh=area_thresh,
+                                     show=False)
     short = 'short_{}'.format(clean)
     short_image = short_image > 1
     # Skeletonize
@@ -287,15 +353,16 @@ def skeleton_image(folder, image_file, threshold=50, area_thresh=50, figsize=(10
     branch_data = csr.summarise(skeleton0)
     branch_data_short = branch_data
 
-    #Remove small branches
+    # Remove small branches
     mglia = branch_data['skeleton-id'].max()
     nbranches = []
 
     ncount = 0
     for i in range(1, mglia+1):
-        bcount = branch_data[branch_data['skeleton-id']==i]['skeleton-id'].count()
+        bcount = branch_data[branch_data['skeleton-id'
+                                         ] == i]['skeleton-id'].count()
         if bcount > 0:
-            ids = branch_data.index[branch_data['skeleton-id']==i].tolist()
+            ids = branch_data.index[branch_data['skeleton-id'] == i].tolist()
             nbranches.append(bcount)
             for j in range(0, len(ids)):
                 branch_data_short.drop([ids[j]])
@@ -305,11 +372,13 @@ def skeleton_image(folder, image_file, threshold=50, area_thresh=50, figsize=(10
         fig, ax = plt.subplots(figsize=figsize)
         if disp_binary:
             draw.overlay_euclidean_skeleton_2d(short_image, branch_data_short,
-                                               skeleton_color_source='branch-type', axes=ax)
+                                               skeleton_color_source='branch-type',
+                                               axes=ax)
         else:
             draw.overlay_euclidean_skeleton_2d(image0, branch_data_short,
-                                               skeleton_color_source='branch-type', axes=ax)
-        
+                                               skeleton_color_source='branch-type',
+                                               axes=ax)
+
     if default_name:
         output = 'skel_{}'.format(short)
     else:
@@ -320,10 +389,31 @@ def skeleton_image(folder, image_file, threshold=50, area_thresh=50, figsize=(10
 
 
 def mglia_features(props, branch_data_short, convert=False, umppx=1):
+    """Assembles feature dataset from pre-processed cellular images
+
+    Parameters
+    ----------
+    props : skimage.object
+        Contains raw properties from input cell image. Output from
+        im_process.skeleton_image
+    branch_data_short : blank
+        Data from skeletonized cells. Output from im_process.skeleton_image
+    convert : bool
+        If True, converts from pixels to microns using umppx
+    umppx : int or float
+        Conversion ratio from pixels to microns
+
+    Returns
+    -------
+    features : pandas.core.frames.DataFrame
+        Pandas dataframe of cellular features
+
+    Notes
+    -----
+    Raises error if skeleton is missing from any cell in the binary image.
+
     """
-    Note: raises error if skeleton is missing from any cell in the binary image.
-    """
-    
+
     X = np.zeros((len(props)))
     Y = np.zeros((len(props)))
     perimeter = np.zeros((len(props)))
@@ -335,11 +425,11 @@ def mglia_features(props, branch_data_short, convert=False, umppx=1):
     mean_intensity = np.zeros((len(props)))
     moments = [0]*len(props)
     solidity = np.zeros((len(props)))
-    #total_processes = np.zeros((len(props)))
-    #avg_p_length = np.zeros((len(props)))
-    #main_process = np.zeros((len(props)))
+    # total_processes = np.zeros((len(props)))
+    # avg_p_length = np.zeros((len(props)))
+    # main_process = np.zeros((len(props)))
 
-    #properties that can be found from sklearn.measure.regionprops
+    # properties that can be found from sklearn.measure.regionprops
     counter = 0
     for item in props:
         X[counter] = item.centroid[0]
@@ -349,72 +439,85 @@ def mglia_features(props, branch_data_short, convert=False, umppx=1):
         eccentricity[counter] = item.eccentricity
         inertia_tensor[counter] = item.inertia_tensor
         label[counter] = item.label
-        #max_intensity[counter] = item.max_intensity
-        #mean_intensity[counter] = item.mean_intensity
+        # max_intensity[counter] = item.max_intensity
+        # mean_intensity[counter] = item.mean_intensity
         moments[counter] = item.moments
         solidity[counter] = item.solidity
         counter = counter + 1
-        
-    #properties associated with processes as found from skan
+
+    # properties associated with processes as found from skan
     mglia = branch_data_short['skeleton-id'].max()
     nbranches = []
     avg_p_length = []
     main_process = []
-    
+
     xs = []
     ys = []
 
     ncount = 0
     for i in branch_data_short['skeleton-id'].unique():
-        bcount = branch_data_short[branch_data_short['skeleton-id']==i]['skeleton-id'].count()
-        bavg = np.mean(branch_data_short[branch_data_short['skeleton-id']==i]['branch-distance'])
-        blong = np.max(branch_data_short[branch_data_short['skeleton-id']==i]['branch-distance'])
-        xcoord = np.mean([np.mean(branch_data_short[branch_data_short['skeleton-id']==i]['img-coord-0-0']), 
-                         np.mean(branch_data_short[branch_data_short['skeleton-id']==i]['img-coord-1-0'])])
+        bcount = branch_data_short[branch_data_short[
+                                   'skeleton-id'] == i]['skeleton-id'].count()
+        bavg = np.mean(branch_data_short[
+                       branch_data_short['skeleton-id'] == i][
+                       'branch-distance'])
+        blong = np.max(branch_data_short[
+                       branch_data_short['skeleton-id'] == i][
+                       'branch-distance'])
+        xcoord = np.mean([np.mean(
+                         branch_data_short[branch_data_short[
+                          'skeleton-id'] == i]['img-coord-0-0']),
+                         np.mean(branch_data_short[
+                          branch_data_short['skeleton-id'] == i][
+                          'img-coord-1-0'])])
         xs.append(xcoord)
-        ycoord = np.mean([np.mean(branch_data_short[branch_data_short['skeleton-id']==i]['img-coord-0-1']), 
-                         np.mean(branch_data_short[branch_data_short['skeleton-id']==i]['img-coord-1-1'])])
+        ycoord = np.mean([np.mean(branch_data_short[
+                         branch_data_short['skeleton-id'] == i][
+                         'img-coord-0-1']),
+                         np.mean(branch_data_short[
+                          branch_data_short['skeleton-id'] == i][
+                          'img-coord-1-1'])])
         ys.append(ycoord)
         nbranches.append(bcount)
         avg_p_length.append(bavg)
         main_process.append(blong)
-        
+
     nbranches_ord = [0]*len(nbranches)
     avg_p_length_ord = [0]*len(nbranches)
     main_process_ord = [0]*len(nbranches)
 
     for i in range(0, len(xs)):
-        #print(xs[i], ys[i])
+        # print(xs[i], ys[i])
         skel_id = i
         min_function = np.square(xs[i] - X)+np.square(ys[i] - Y)
         mglia_id = np.argmin(min_function)
         nbranches_ord[mglia_id] = nbranches[skel_id]
         avg_p_length_ord[mglia_id] = avg_p_length[skel_id]
         main_process_ord[mglia_id] = main_process[skel_id]
-        #print(mglia_id)
-        #print(np.min(min_function))
-    
+        # print(mglia_id)
+        # print(np.min(min_function))
+
     if convert:
         factor = umppx
     else:
         factor = 1
 
-    features = pd.DataFrame({ 'X' : X*factor,
-                              'Y' : Y*factor,
-                              'perimeter' : perimeter*factor,
-                              'area' : areas*factor*factor,
-                              'eccentricity' : eccentricity,
-                              'inertia_tensor' : inertia_tensor,
-                              'label' : label,
-                              #'max intensity' : max_intensity,
-                              #'mean intensity' : mean_intensity,
-                              'moments' : moments,
-                              'solidity' : solidity,
-                              'total_branches' : nbranches_ord,
-                              'average_branch' : [x*factor for x in avg_p_length_ord],
-                              'main_branch' : [x*factor for x in main_process_ord]
-                            })
-    
+    features = pd.DataFrame({'X': X*factor,
+                             'Y': Y*factor,
+                             'perimeter': perimeter*factor,
+                             'area': areas*factor*factor,
+                             'eccentricity': eccentricity,
+                             'inertia_tensor': inertia_tensor,
+                             'label': label,
+                             # 'max intensity' : max_intensity,
+                             # 'mean intensity' : mean_intensity,
+                             'moments': moments,
+                             'solidity': solidity,
+                             'total_branches': nbranches_ord,
+                             'average_branch': [x*factor for x in avg_p_length_ord],
+                             'main_branch': [x*factor for x in main_process_ord]
+                             })
+
     return features
 
 
@@ -425,7 +528,7 @@ def features_hist(features, feature, bin_size=100, bin_range=5000):
     nbins = bin_range/bin_size + 1
     test_bins = np.linspace(0, bin_range, nbins)
     dist = features[feature]
-    
+
     histogram, test_bins = np.histogram(dist, bins=test_bins)
 
     # Plot_general_histogram_code
@@ -442,11 +545,11 @@ def features_hist(features, feature, bin_size=100, bin_range=5000):
     plt.xlabel(xlabel, fontsize=30)
     plt.ylabel(ylabel, fontsize=30)
     plt.tick_params(axis='both', which='major', labelsize=20)
-    
+
     plt.show()
 
-    
-def read_xmlpoints(xmlfile, converttopix = True, umppx=0.62, offset=(17000, -1460)):
+
+def read_xmlpoints(xmlfile, converttopix=True, umppx=0.62, offset=(17000, -1460)):
     tree = et.parse(xmlfile)
     root = tree.getroot()
 
@@ -454,13 +557,13 @@ def read_xmlpoints(xmlfile, converttopix = True, umppx=0.62, offset=(17000, -146
     x = []
     xmlpoints = []
     counter = 0
-    
+
     for point in root[0]:
         if counter > 1:
             x = float(point[2].attrib['value'])
             y = float(point[3].attrib['value'])
             if converttopix:
-                xmlpoints.append(((x-offset[0])/umppx,(y-offset[1])/umppx))
+                xmlpoints.append(((x-offset[0])/umppx, (y-offset[1])/umppx))
             else:
                 xmlpoints.append((x, y))
         counter = counter + 1
@@ -468,9 +571,9 @@ def read_xmlpoints(xmlfile, converttopix = True, umppx=0.62, offset=(17000, -146
     return xmlpoints
 
 
-def crop_to_videodims(cell_image, multichannel = False, vidpoint=(600, 600), defaultdims=True, dim=512, save=True,
+def crop_to_videodims(cell_image, multichannel=False, vidpoint=(600, 600), defaultdims=True, dim=512, save=True,
                       fname='test.tif'):
-    
+
     if defaultdims:
         ndim = 512
     else:
@@ -481,8 +584,5 @@ def crop_to_videodims(cell_image, multichannel = False, vidpoint=(600, 600), def
 
     if save:
         sio.imsave(fname, subim)
-        
+
     return subim
-
-
-
