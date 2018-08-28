@@ -8,6 +8,10 @@ env:
 python:
 - '3.6'
 
+#script:
+#- cd $HOME/diff_register
+#- python tests.py
+
 install:
 - pip install -U tox-travis coverage coveralls
 - travis_retry pip install $PIP_DEPS
@@ -21,11 +25,12 @@ before_script: # configure a headless display to test plot generation
 
 script:
 - py.test --pyargs diff_register --cov-report term-missing --cov=diff_register
+#- tox
 - coverage report
 
 after_success:
 - coveralls
 
 after_success:
-ls -a
+- ls -a
 - coveralls
