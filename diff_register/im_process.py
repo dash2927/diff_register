@@ -10,7 +10,8 @@ from skimage.measure import regionprops, label
 from skan import csr, draw
 
 
-def fuzzy_contrast(folder, image_file, figsize=(10, 10), show=False):
+def fuzzy_contrast(folder, image_file, figsize=(10, 10), 
+                   channel=None, show=False):
     """Increase the contrast of input image by using fuzzy logic.
 
     Parameters
@@ -23,6 +24,9 @@ def fuzzy_contrast(folder, image_file, figsize=(10, 10), show=False):
         Size of output image
     show : bool
         If True, outputs image to Jupyter notebook display.
+    channel : int
+        Channel of image to read in for multichannel images e.g.
+        testim[:, :, channel]
 
     Returns
     -------
@@ -59,17 +63,17 @@ def fuzzy_contrast(folder, image_file, figsize=(10, 10), show=False):
     # Apply to image
     fname = '{}/{}'.format(folder, image_file)
     test_image = sio.imread(fname)
-    if image_file.split('.')[1] == 'tif':
-        test_image = test_image[:, :, 1] / test_image[:, :, 1].max()
-    else:
+    if channel == None:
         test_image = test_image / test_image.max()
+    else:
+        test_image = test_image[:, :, channel] / test_image[:, :, channel].max()
     F.input['dark'] = test_image
     F.compute()
     fuzzy_image = F.output['darker']
+    rf_image = (255.0 / fuzzy_image.max() * (fuzzy_image - fuzzy_image.min())).astype(np.uint8)
 
     if show:
         fig, ax = plt.subplots(figsize=figsize)
-        rf_image = (255.0 / fuzzy_image.max() * (fuzzy_image - fuzzy_image.min())).astype(np.uint8)
         ax.imshow(rf_image, cmap='gray', vmin=0, vmax=255.0)
         ax.axis('off')
 
@@ -80,8 +84,8 @@ def fuzzy_contrast(folder, image_file, figsize=(10, 10), show=False):
 
 
 def binary_image(folder, image_file, threshold=2, figsize=(10, 10),
-                 op_image=False, close=False, show=False, multichannel=False,
-                 channel=0, default_name=True, fname='test.png'):
+                 ajar=False, close=False, show=False,
+                 channel=None, imname=None):
     """Create binary image from input image with optional opening step.
 
     Parameters
@@ -94,7 +98,7 @@ def binary_image(folder, image_file, threshold=2, figsize=(10, 10),
         Intensity threshold of binary image.
     figsize : tuple of int or float
         Size of output figure
-    op_image : bool
+    ajar : bool
         If True, opens binary image by performing a dilation followed by
         an erosion.
     close : bool
@@ -102,15 +106,11 @@ def binary_image(folder, image_file, threshold=2, figsize=(10, 10),
         dilation.
     show : bool
         If True, outputs image to Jupyter notebook display
-    multichannel : bool
-        If True, reads in image as multichannel image
     channel : int
-        Specifies which channel to read in as image from multichannel image
-    default_name : bool
-        If True, output filename will append 'clean' to beginning of original
-        filename
+        Channel of image to read in for multichannel images e.g.
+        testim[:, :, channel]
     fname : string
-        If default_name is set to False, filename will be named fname
+        Desired name of output file. Defaults to 'test.png'
 
     Returns
     -------
@@ -123,13 +123,14 @@ def binary_image(folder, image_file, threshold=2, figsize=(10, 10),
     """
 
     fname = '{}/{}'.format(folder, image_file)
-    if multichannel:
-        test_image = sio.imread(fname)[:, :, channel]
-    else:
+    if channel == None:
         test_image = sio.imread(fname)
+    else:
+        test_image = sio.imread(fname)[:, :, channel]
+
     bi_image = test_image > threshold
 
-    if open is True:
+    if ajar is True:
         op_image = opening(bi_image, square(3))
     else:
         op_image = bi_image
@@ -144,12 +145,12 @@ def binary_image(folder, image_file, threshold=2, figsize=(10, 10),
 
     op_image = op_image.astype('uint8')*255
 
-    if default_name:
-        output = "clean_{}.png".format(image_file.split('.')[0])
+    if imname == None:
+        output = "clean_{}".format(image_file)
     else:
-        output = fname
+        output = imname
 
-    sio.imsave(folder+'/'+output, op_image)
+    sio.imsave('{}/{}'.format(folder, output), op_image)
 
     return op_image
 
