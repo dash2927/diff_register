@@ -15,6 +15,7 @@ build:
     tests:
         before:
             - pip install coverage
+            - pip install numpy
         override:
             -
                 command: 'tox'
