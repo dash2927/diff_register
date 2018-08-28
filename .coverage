@@ -1,0 +1,13 @@
+language: python
+python:
+  - "3.5"
+install:
+  - pip install -e . --use-mirrors
+before_script:
+  - pip install -r requirements.txt --use-mirrors
+  - git clone https://github.com/ccurtis7/diff_register.git
+  - cd ./diff_register/diff_register/tests/
+script:
+  - py.test test_im_process.py --doctest-modules --pep8 coveralls -v --cov coveralls --cov-report term-missing
+after_success:
+  - coveralls
