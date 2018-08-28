@@ -2,6 +2,7 @@ numpy
 scipy
 matplotlib
 pandas
+numba
 scikit-image
 scikit-fuzzy
 skan
