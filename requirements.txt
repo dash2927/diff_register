@@ -3,5 +3,6 @@ scipy
 matplotlib
 pandas
 scikit-image
-skfuzzy
+scikit-fuzzy
 skan
+
