@@ -15,11 +15,16 @@ build:
     tests:
         before:
             - pip install coverage
-            - pip install numpy
+            - 'pip3 install pylint Coverage'
         override:
             -
-                command: 'tox'
+                command: 'coverage run --include="*diff_register*" setup.py test'
                 coverage:
                     file: '.coverage'
-                    config_file: '.coveragerc'
                     format: 'py-cc'
+		idle_timeout: 720
+	    -
+		command: 'pylint diff_register --output-format=parseable --reports=n --include-naming-hint=y | tee pylint-data'
+		analysis:
+		    file: 'pylint-data'
+		    format: 'pylint-parseable'
