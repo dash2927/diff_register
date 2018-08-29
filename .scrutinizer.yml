@@ -7,10 +7,11 @@ filter:
         - 'tests/*' 
 build:
     environment:
-        python: '3.6.0'
+        python: '3.6.3'
     tests:
         before:
             - 'pip3 install pylint Coverage'
+            - 'pip3 install numpy'
         override:
             -
                 command: 'coverage run --include="*diff_register*" setup.py test'
