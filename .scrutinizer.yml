@@ -18,7 +18,7 @@ build:
                     file: '.coverage'
                     format: 'py-cc'
                 idle_timeout: 720
-	    -
+            -
                 command: 'pylint diff_register --output-format=parseable --reports=n --include-naming-hint=y | tee pylint-data'
                 analysis:
                     file: 'pylint-data'
