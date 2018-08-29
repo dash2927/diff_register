@@ -1,3 +1,8 @@
+"""Image processing functions designed to extract cellular features from input
+fluorescently stained images.
+
+"""
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -10,7 +15,7 @@ from skimage.measure import regionprops, label
 from skan import csr, draw
 
 
-def fuzzy_contrast(folder, image_file, figsize=(10, 10), 
+def fuzzy_contrast(folder, image_file, figsize=(10, 10),
                    channel=None, show=False):
     """Increase the contrast of input image by using fuzzy logic.
 
@@ -63,14 +68,15 @@ def fuzzy_contrast(folder, image_file, figsize=(10, 10),
     # Apply to image
     fname = '{}/{}'.format(folder, image_file)
     test_image = sio.imread(fname)
-    if channel == None:
+    if channel is None:
         test_image = test_image / test_image.max()
     else:
         test_image = test_image[:, :, channel] / test_image[:, :, channel].max()
     F.input['dark'] = test_image
     F.compute()
     fuzzy_image = F.output['darker']
-    rf_image = (255.0 / fuzzy_image.max() * (fuzzy_image - fuzzy_image.min())).astype(np.uint8)
+    rf_image = (255.0 / fuzzy_image.max() * (fuzzy_image - fuzzy_image.min())
+                ).astype(np.uint8)
 
     if show:
         fig, ax = plt.subplots(figsize=figsize)
@@ -109,7 +115,7 @@ def binary_image(folder, image_file, threshold=2, figsize=(10, 10),
     channel : int
         Channel of image to read in for multichannel images e.g.
         testim[:, :, channel]
-    fname : string
+    imname : string
         Desired name of output file. Defaults to 'test.png'
 
     Returns
@@ -123,7 +129,7 @@ def binary_image(folder, image_file, threshold=2, figsize=(10, 10),
     """
 
     fname = '{}/{}'.format(folder, image_file)
-    if channel == None:
+    if channel is None:
         test_image = sio.imread(fname)
     else:
         test_image = sio.imread(fname)[:, :, channel]
@@ -145,7 +151,7 @@ def binary_image(folder, image_file, threshold=2, figsize=(10, 10),
 
     op_image = op_image.astype('uint8')*255
 
-    if imname == None:
+    if imname is None:
         output = "clean_{}".format(image_file)
     else:
         output = imname
@@ -155,16 +161,44 @@ def binary_image(folder, image_file, threshold=2, figsize=(10, 10),
     return op_image
 
 
-def clean_image(folder, image_file, threshold=2, figsize=(10, 10), op_image=False, close=False, show=False,
-                area_thresh=50, multichannel=False, channel=0, default_name=True, fname='test.png'):
-    """
-    Create binary image from input image with optional opening step.
+def clean_image(folder, image_file, threshold=2, figsize=(10, 10),
+                ajar=False, close=False, show=False,
+                area_thresh=50, channel=None, imname=None):
+    """Create binary image from input image with optional opening step.
 
     Parameters
     ----------
+    folder : string
+        Directory containing image_file
+    image_file : string
+        Filename of image to be analyzed.
+    threshold : int or float
+        Intensity threshold of binary image.
+    figsize : tuple of int or float
+        Size of output figure
+    ajar : bool
+        If True, opens binary image by performing a dilation followed by
+        an erosion.
+    close : bool
+        If True, closes binary image by performing an erosion followed by a
+        dilation.
+    show : bool
+        If True, outputs image to Jupyter notebook display
+    area_thresh : int or float
+        Minimum square pixels for object to be included in final image
+    channel : int
+        Channel of image to read in for multichannel images e.g.
+        testim[:, :, channel]
+    imname : string
+        Desired name of output file. Defaults to 'test.png'
 
     Returns
     -------
+    short_image : numpy.ndarray
+        Output binary image. All small objects (area < area_thresh) are
+        filtered out
+    short_props : skimage.object
+        Contains all properties of objects identified in image
 
     Examples
     --------
@@ -172,13 +206,13 @@ def clean_image(folder, image_file, threshold=2, figsize=(10, 10), op_image=Fals
     """
 
     fname = '{}/{}'.format(folder, image_file)
-    if multichannel:
-        test_image = sio.imread(fname)[:, :, channel]
-    else:
+    if channel is None:
         test_image = sio.imread(fname)
+    else:
+        test_image = sio.imread(fname)[:, :, channel]
     bi_image = test_image > threshold
 
-    if open is True:
+    if ajar is True:
         op_image = opening(bi_image, square(3))
     else:
         op_image = bi_image
@@ -195,7 +229,7 @@ def clean_image(folder, image_file, threshold=2, figsize=(10, 10), op_image=Fals
 
 #     sio.imsave(folder+'/'+output, op_image)
 
-    ##Labelling and cleaning up image.
+    # Labelling and cleaning up image.
     test_image = op_image
     labels = label(test_image)
     props = regionprops(labels)
@@ -222,25 +256,49 @@ def clean_image(folder, image_file, threshold=2, figsize=(10, 10), op_image=Fals
 
     short_image = short_image.astype('uint8')*255
 
-    if default_name:
-        output = "short_{}.png".format(image_file.split('.')[0])
+    if imname is None:
+        output = "short_{}".format(image_file)
     else:
-        output = fname
+        output = imname
 
     sio.imsave(folder+'/'+output, short_image)
 
     return short_image, short_props
 
 
-def label_image(folder, image_file, area_thresh=50, figsize=(10, 10), show=False, default_name=True, fname='test1.png'):
-    """
-    Create label image and calculate region properties.
+def label_image(folder, image_file, area_thresh=50, figsize=(10, 10),
+                show=False, imname=None):
+    """Filters out small objects from binary image and finds cell features.
+
+    Similar to clean_image, but operates on imput binary image rather than the
+    raw image file. Run binary_image on raw image file before feeding into
+    label_image.
 
     Parameters
     ----------
+    folder : string
+        Directory containing image_file
+    image_file : string
+        Filename of image to be analyzed.
+    figsize : tuple of int or float
+        Size of output figure
+    show : bool
+        If True, outputs image to Jupyter notebook display
+    area_thresh : int or float
+        Minimum square pixels for object to be included in final image
+    channel : int
+        Channel of image to read in for multichannel images e.g.
+        testim[:, :, channel]
+    imname : string
+        Desired name of output file. Defaults to 'test.png'
 
     Returns
     -------
+    short_image : numpy.ndarray
+        Output binary image. All small objects (area < area_thresh) are
+        filtered out
+    short_props : skimage.object
+        Contains all properties of objects identified in image
 
     Examples
     --------
@@ -274,21 +332,23 @@ def label_image(folder, image_file, area_thresh=50, figsize=(10, 10), show=False
 
     short_image = short_image.astype('uint8')*255
 
-    if default_name:
-        output = "short_{}.png".format(image_file.split('.')[0])
+    if imname is None:
+        output = "short_{}".format(image_file)
     else:
-        output = fname
+        output = imname
 
     sio.imsave(folder+'/'+output, short_image)
 
     return short_image, short_props
 
 
-def skeleton_image(folder, image_file, threshold=50, area_thresh=50, figsize=(10, 10), show=False, multichannel=False, channel=0,
-                   disp_binary=True, default_name=True, fname='test2.png'):
+def skeleton_image(folder, image_file, threshold=50, area_thresh=50,
+                   figsize=(10, 10), show=False, channel=0,
+                   disp_binary=True, imname=None):
     """Skeletonizes the image and returns properties of each skeleton.
 
-    Composite function of above functions
+    Composite function of binary_image, clean_image and skeletonizing
+    functionality from skan.
 
     Parameters
     ----------
@@ -304,20 +364,26 @@ def skeleton_image(folder, image_file, threshold=50, area_thresh=50, figsize=(10
         Size out output figure
     show : bool
         If True, prints image to Jupyter notebook
-    multichannel : bool
-        If True, reads in image as multichannel image
     channel : int
         If multichannel is True, reads in image corresponding to this channel in
         file.
     disp_binary: bool
         If True, prints binary image instead of raw image
-    default_name : bool
-        If True, names output image by appending original filename with 'skel'
-    fname : string
-        If default_name is False, output filename is named fname
+    imname : string
+        Output filename
 
     Returns
     -------
+    skeleton0 : numpy.ndarray
+        Skeletonized version of input image_file
+    branch_data_short : pandas.core.frame.DataFrame
+        Data associated with each branch found in input image
+    nbranches : list
+        Number of branches on each cell in branch_data_short
+    short_image : numpy.ndarray
+        Cleaned up binary image from image_file prior to skeletonization
+    props : skimage.object
+        Contains all properties of objects identified in image
 
     Examples
     --------
@@ -327,12 +393,12 @@ def skeleton_image(folder, image_file, threshold=50, area_thresh=50, figsize=(10
     # Median filtered image.
     fname = '{}/{}'.format(folder, image_file)
     image0 = sio.imread(fname)
-    if multichannel:
+    if channel is None:
+        image0 = np.ceil(255 * (image0[:, :] / image0[:, :].max())).astype(int)
+    else:
         image0 = np.ceil(255 * (image0[:, :, channel
                                        ] / image0[:, :, channel
                                                   ].max())).astype(int)
-    else:
-        image0 = np.ceil(255 * (image0[:, :] / image0[:, :].max())).astype(int)
 
     image0 = skimage.filters.median(image0)
     filt = 'filt_{}.png'.format(image_file.split('.')[0])
@@ -380,10 +446,10 @@ def skeleton_image(folder, image_file, threshold=50, area_thresh=50, figsize=(10
                                                skeleton_color_source='branch-type',
                                                axes=ax)
 
-    if default_name:
-        output = 'skel_{}'.format(short)
+    if imname is None:
+        output = "skel_{}".format(image_file)
     else:
-        output = fname
+        output = imname
     plt.savefig('{}/{}'.format(folder, output))
 
     return skeleton0, branch_data_short, nbranches, short_image, props
@@ -523,6 +589,21 @@ def mglia_features(props, branch_data_short, convert=False, umppx=1):
 
 
 def features_hist(features, feature, bin_size=100, bin_range=5000):
+    """Plots a histogram of a desired cell feature
+
+    Parameters
+    ----------
+    features : pandas.core.frames.DataFrame
+        Features output from mglia_features
+    feature : string
+        Column name contained in features
+    bin_size : int or float
+        Changes resolution of histogram bars
+    bin_range : int or float
+        Upper limit to plot of feature data
+
+    """
+
     xlabel = "Microglia {} (pixels)".format(feature)
     ylabel = "Count"
 
@@ -550,7 +631,30 @@ def features_hist(features, feature, bin_size=100, bin_range=5000):
     plt.show()
 
 
-def read_xmlpoints(xmlfile, converttopix=True, umppx=0.62, offset=(17000, -1460)):
+def read_xmlpoints(xmlfile, umppx=0.62, offset=(17000, -1460)):
+    """Reads xy data from XML dataframe from Nikon ND Analysis software.
+
+    Designed to convert micron coordinates at which videos were collected
+    to pixels within a large tilescan image which contains coordinates at which
+    videos were collected.
+
+    Parameters
+    ----------
+    xmlfile : string
+        Filename of XML file to be read
+    umppx : int or float
+        Microns per pixel ratio at which images were collected. If None, no
+        conversion will be performed.
+    offset : Coordinates of upper left hand corner of collected tilescan image?
+        Required for accurate conversion from microns to pixels
+
+    Returns
+    -------
+    xmlpoints : list of tuple of float
+        XY points contained in XML file and converted to pixels
+
+
+    """
     tree = et.parse(xmlfile)
     root = tree.getroot()
 
@@ -563,27 +667,45 @@ def read_xmlpoints(xmlfile, converttopix=True, umppx=0.62, offset=(17000, -1460)
         if counter > 1:
             x = float(point[2].attrib['value'])
             y = float(point[3].attrib['value'])
-            if converttopix:
-                xmlpoints.append(((x-offset[0])/umppx, (y-offset[1])/umppx))
-            else:
+            if umppx is None:
                 xmlpoints.append((x, y))
+            else:
+                xmlpoints.append(((x-offset[0])/umppx, (y-offset[1])/umppx))
         counter = counter + 1
 
     return xmlpoints
 
 
-def crop_to_videodims(cell_image, multichannel=False, vidpoint=(600, 600), defaultdims=True, dim=512, save=True,
+def crop_to_videodims(cell_image, channel=None, vidpoint=(600, 600), dim=512,
                       fname='test.tif'):
+    """Crops subimage from large tilescan image
 
-    if defaultdims:
-        ndim = 512
-    else:
-        ndim = dim
+    Designed to cut subimages from tilescan images that align with videos
+    collected at points within that image. Meant to register videos collected
+    via fluorescent imaging with tilescan images collected via confocal imaging.
 
-    if not multichannel:
-        subim = cell_image[int(vidpoint[0]-ndim/2):int(vidpoint[0]+ndim/2), int(vidpoint[1]-ndim/2):int(vidpoint[1]+ndim/2)]
+    Parameters
+    ----------
+    cell_image : numpy.ndarray
+        Large tilescan image
+    channel : int
+        If multichannel is True, reads in image corresponding to this channel in
+        file. Currently can't handly multichannel images
+    vidpoint : tuple of float or int
+        XY coordinates in pixels at which to crop
+    dim : int
+        Dimensions of desired output image
+    fname : string
+        Desired filename of output image. If None, saving step will be skipped
 
-    if save:
+    """
+
+    ndim = dim
+    if channel is None:
+        subim = cell_image[int(vidpoint[0]-ndim/2):int(vidpoint[0]+ndim/2),
+                           int(vidpoint[1]-ndim/2):int(vidpoint[1]+ndim/2)]
+
+    if fname is not None:
         sio.imsave(fname, subim)
 
     return subim
