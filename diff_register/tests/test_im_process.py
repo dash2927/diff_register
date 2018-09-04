@@ -52,7 +52,28 @@ def test_binary_image():
 
 
 def test_clean_image():
-    print()
+    # test 1
+    np.random.seed(seed=1)
+    testim = np.random.exponential(1, size=(40, 40))
+    testim = testim / np.max(testim)
+    sio.imsave('test.tif', testim)
+    testcl, props = imp.clean_image('.', 'test.tif', threshold=0.01,
+                                    area_thresh=10, ajar=True,
+                                    close=True, imname=None)
+    assert np.round(np.average(testcl), 1) == 244.5
+
+    # test 2
+    testcl, props = imp.clean_image('.', 'test.tif', threshold=0.01,
+                                    area_thresh=10, ajar=True,
+                                    close=False, imname=None)
+    assert np.round(np.average(testcl), 1) == 222.6
+
+    # test 3
+    testcl, props = imp.clean_image('.', 'test.tif', threshold=0.01,
+                                    area_thresh=10, ajar=False,
+                                    close=False, imname='clim.tif')
+    assert np.round(np.average(testcl), 1) == 238.3
+    assert os.path.isfile('clim.tif')
 
 
 def test_label_image():
