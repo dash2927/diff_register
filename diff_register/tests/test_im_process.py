@@ -108,7 +108,7 @@ def test_skeleton_image():
                                   close=False, imname='skel.tif',
                                   channel=None, show=False)
     assert np.round(np.average(skeleton.im), 3) == 0.136
-    assert np.sum(skeleton.bran) == 51
+    assert np.sum(skeleton.nbran) == 51
     assert (51, 14) == skeleton.branchdat.values.shape
     assert op.isfile('skel.tif')
 
@@ -117,7 +117,7 @@ def test_skeleton_image():
                                   close=True, imname=None,
                                   channel=None, show=False)
     assert np.round(np.average(skeleton.im), 3) == 0.002
-    assert np.sum(skeleton.bran) == 1
+    assert np.sum(skeleton.nbran) == 1
     assert (1, 14) == skeleton.branchdat.values.shape
     assert op.isfile('skel_test.tif')
 
