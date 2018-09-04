@@ -15,6 +15,11 @@ from skimage.measure import regionprops, label
 from skan import csr, draw
 
 
+class Bunch:
+    def __init__(self, **kwds):
+        self.__dict__.update(kwds)
+
+
 def fuzzy_contrast(folder, image_file, figsize=(10, 10),
                    channel=None, show=False):
     """Increase the contrast of input image by using fuzzy logic.
@@ -452,7 +457,10 @@ def skeleton_image(folder, image_file, threshold=50, area_thresh=50,
         output = imname
     plt.savefig('{}/{}'.format(folder, output))
 
-    return skeleton0, branch_data_short, nbranches, short_image, props
+    skel = Bunch(im=skeleton0, branchdat=branch_data_short, nbran=nbranches,
+                    shortim=short_image, props=props)
+
+    return skel
 
 
 def mglia_features(props, branch_data_short, convert=False, umppx=1):
