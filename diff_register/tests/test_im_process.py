@@ -119,7 +119,7 @@ def test_skeleton_image():
     assert np.round(np.average(skeleton.im), 3) == 0.002
     assert np.sum(skeleton.nbran) == 1
     assert (1, 14) == skeleton.branchdat.values.shape
-    assert op.isfile('skel_test.tif')
+    assert op.isfile('skel_filt_test.tif')
 
 
 def test_mglia_features():
