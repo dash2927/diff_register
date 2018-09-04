@@ -409,15 +409,11 @@ def skeleton_image(folder, image_file, threshold=50, area_thresh=50,
     filt = 'filt_{}.png'.format(image_file.split('.')[0])
     sio.imsave(folder+'/'+filt, image0)
 
-    # threshold the image
-    binary0 = binary_image(folder, filt, threshold=threshold, ajar=ajar,
-                           close=close, show=False)
-    clean = 'clean_{}'.format(filt)
-
     # label image
-    short_image, props = label_image(folder, clean, area_thresh=area_thresh,
-                                     show=False)
-    short = 'short_{}'.format(clean)
+    short_image, props = clean_image(folder, filt, threshold=threshold,
+                                     area_thresh=area_thresh, ajar=ajar,
+                                     close=close, imname='labelim.tif',
+                                     channel=None, show=False)
     short_image = short_image > 1
     # Skeletonize
     skeleton0 = skeletonize(short_image)
