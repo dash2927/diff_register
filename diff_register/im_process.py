@@ -348,7 +348,7 @@ def label_image(folder, image_file, area_thresh=50, figsize=(10, 10),
 
 
 def skeleton_image(folder, image_file, threshold=50, area_thresh=50,
-                   ajar=True, close=True, figsize=(10, 10),
+                   tofilt=True, ajar=True, close=True, figsize=(10, 10),
                    show=False, channel=0, disp_binary=True, imname=None):
     """Skeletonizes the image and returns properties of each skeleton.
 
@@ -405,12 +405,13 @@ def skeleton_image(folder, image_file, threshold=50, area_thresh=50,
                                        ] / image0[:, :, channel
                                                   ].max())).astype(int)
 
-    image0 = skimage.filters.median(image0)
-    filt = 'filt_{}.png'.format(image_file.split('.')[0])
-    sio.imsave(folder+'/'+filt, image0)
+    if tofilt:
+        image0 = skimage.filters.median(image0)
+        image_file = 'filt_{}.png'.format(image_file.split('.')[0])
+        sio.imsave(folder+'/'+image_file, image0)
 
     # label image
-    short_image, props = clean_image(folder, filt, threshold=threshold,
+    short_image, props = clean_image(folder, image_file, threshold=threshold,
                                      area_thresh=area_thresh, ajar=ajar,
                                      close=close, imname='labelim.tif',
                                      channel=None, show=False)
