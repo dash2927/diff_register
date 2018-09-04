@@ -73,11 +73,28 @@ def test_clean_image():
                                     area_thresh=10, ajar=False,
                                     close=False, imname='clim.tif')
     assert np.round(np.average(testcl), 1) == 238.3
-    assert os.path.isfile('clim.tif')
+    assert op.isfile('clim.tif')
 
 
 def test_label_image():
-    print()
+    # test 1
+    np.random.seed(seed=1)
+    testim = np.random.exponential(1, size=(40, 40))
+    testim = testim / np.max(testim)
+    sio.imsave('test.tif', testim)
+
+    testbi = imp.binary_image('.', 'test.tif', threshold=0.01,
+                              show=False, imname='testbi.tif')
+
+    # test 2
+    testcl, props = imp.label_image('.', 'testbi.tif', area_thresh=10,
+                                    imname='clim.tif')
+    assert np.round(np.average(testcl), 1) == 238.3
+    assert op.isfile('clim.tif')
+
+    testcl, props = imp.label_image('.', 'testbi.tif', area_thresh=1,
+                                    imname=None)
+    assert op.isfile('short_testbi.tif')
 
 
 def test_skeleton_image():
