@@ -407,7 +407,7 @@ def skeleton_image(folder, image_file, threshold=50, area_thresh=50,
 
     if tofilt:
         image0 = skimage.filters.median(image0)
-        image_file = 'filt_{}.png'.format(image_file.split('.')[0])
+        image_file = 'filt_{}'.format(image_file)
         sio.imsave(folder+'/'+image_file, image0)
 
     # label image
