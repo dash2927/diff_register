@@ -145,11 +145,3 @@ def test_mglia_features():
 
 def test_features_hist():
     print()
-
-
-def test_read_xml_points():
-    print()
-
-
-def test_crop_to_video_dims():
-    print()

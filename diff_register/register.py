@@ -18,8 +18,7 @@ from dipy.align.imaffine import (MutualInformationMetric,
                                  AffineRegistration)
 
 
-def read_xmlpoints(xmlfile, cell_image, converttopix=True, umppx=0.62,
-                   offset=(17000, -1460)):
+def read_xmlpoints(xmlfile, cell_image, umppx=0.62, offset=(17000, -1460)):
     """Read points saved from Nikon multipoints xml file.
 
     Parameters
@@ -58,10 +57,7 @@ def read_xmlpoints(xmlfile, cell_image, converttopix=True, umppx=0.62,
         if counter > 1:
             x = float(point[2].attrib['value'])
             y = float(point[3].attrib['value'])
-            if converttopix:
-                xmlpoints.append(((x-offset[0])/umppx, (y-offset[1])/umppx))
-            else:
-                xmlpoints.append((x, y))
+            xmlpoints.append(((x-offset[0])/umppx, (y-offset[1])/umppx))
         counter = counter + 1
 
     xmlmod = []

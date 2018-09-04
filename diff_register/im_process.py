@@ -643,82 +643,82 @@ def features_hist(features, feature, bin_size=100, bin_range=5000):
 
     plt.show()
 
-
-def read_xmlpoints(xmlfile, umppx=0.62, offset=(17000, -1460)):
-    """Reads xy data from XML dataframe from Nikon ND Analysis software.
-
-    Designed to convert micron coordinates at which videos were collected
-    to pixels within a large tilescan image which contains coordinates at which
-    videos were collected.
-
-    Parameters
-    ----------
-    xmlfile : string
-        Filename of XML file to be read
-    umppx : int or float
-        Microns per pixel ratio at which images were collected. If None, no
-        conversion will be performed.
-    offset : Coordinates of upper left hand corner of collected tilescan image?
-        Required for accurate conversion from microns to pixels
-
-    Returns
-    -------
-    xmlpoints : list of tuple of float
-        XY points contained in XML file and converted to pixels
-
-
-    """
-    tree = et.parse(xmlfile)
-    root = tree.getroot()
-
-    y = []
-    x = []
-    xmlpoints = []
-    counter = 0
-
-    for point in root[0]:
-        if counter > 1:
-            x = float(point[2].attrib['value'])
-            y = float(point[3].attrib['value'])
-            if umppx is None:
-                xmlpoints.append((x, y))
-            else:
-                xmlpoints.append(((x-offset[0])/umppx, (y-offset[1])/umppx))
-        counter = counter + 1
-
-    return xmlpoints
-
-
-def crop_to_videodims(cell_image, channel=None, vidpoint=(600, 600), dim=512,
-                      fname='test.tif'):
-    """Crops subimage from large tilescan image
-
-    Designed to cut subimages from tilescan images that align with videos
-    collected at points within that image. Meant to register videos collected
-    via fluorescent imaging with tilescan images collected via confocal imaging.
-
-    Parameters
-    ----------
-    cell_image : numpy.ndarray
-        Large tilescan image
-    channel : int
-        If multichannel is True, reads in image corresponding to this channel in
-        file. Currently can't handly multichannel images
-    vidpoint : tuple of float or int
-        XY coordinates in pixels at which to crop
-    dim : int
-        Dimensions of desired output image
-    fname : string
-        Desired filename of output image. If None, saving step will be skipped
-
-    """
-
-    ndim = dim
-    if channel is None:
-        subim = cell_image[int(vidpoint[0]-ndim/2):int(vidpoint[0]+ndim/2),
-                           int(vidpoint[1]-ndim/2):int(vidpoint[1]+ndim/2)]
-
-    if fname is not None:
-        sio.imsave(fname, subim)
-
-    return subim
+#
+# def read_xmlpoints(xmlfile, umppx=0.62, offset=(17000, -1460)):
+#     """Reads xy data from XML dataframe from Nikon ND Analysis software.
+#
+#     Designed to convert micron coordinates at which videos were collected
+#     to pixels within a large tilescan image which contains coordinates at which
+#     videos were collected.
+#
+#     Parameters
+#     ----------
+#     xmlfile : string
+#         Filename of XML file to be read
+#     umppx : int or float
+#         Microns per pixel ratio at which images were collected. If None, no
+#         conversion will be performed.
+#     offset : Coordinates of upper left hand corner of collected tilescan image?
+#         Required for accurate conversion from microns to pixels
+#
+#     Returns
+#     -------
+#     xmlpoints : list of tuple of float
+#         XY points contained in XML file and converted to pixels
+#
+#
+#     """
+#     tree = et.parse(xmlfile)
+#     root = tree.getroot()
+#
+#     y = []
+#     x = []
+#     xmlpoints = []
+#     counter = 0
+#
+#     for point in root[0]:
+#         if counter > 1:
+#             x = float(point[2].attrib['value'])
+#             y = float(point[3].attrib['value'])
+#             if umppx is None:
+#                 xmlpoints.append((x, y))
+#             else:
+#                 xmlpoints.append(((x-offset[0])/umppx, (y-offset[1])/umppx))
+#         counter = counter + 1
+#
+#     return xmlpoints
+#
+#
+# def crop_to_videodims(cell_image, channel=None, vidpoint=(600, 600), dim=512,
+#                       fname='test.tif'):
+#     """Crops subimage from large tilescan image
+#
+#     Designed to cut subimages from tilescan images that align with videos
+#     collected at points within that image. Meant to register videos collected
+#     via fluorescent imaging with tilescan images collected via confocal imaging.
+#
+#     Parameters
+#     ----------
+#     cell_image : numpy.ndarray
+#         Large tilescan image
+#     channel : int
+#         If multichannel is True, reads in image corresponding to this channel in
+#         file. Currently can't handly multichannel images
+#     vidpoint : tuple of float or int
+#         XY coordinates in pixels at which to crop
+#     dim : int
+#         Dimensions of desired output image
+#     fname : string
+#         Desired filename of output image. If None, saving step will be skipped
+#
+#     """
+#
+#     ndim = dim
+#     if channel is None:
+#         subim = cell_image[int(vidpoint[0]-ndim/2):int(vidpoint[0]+ndim/2),
+#                            int(vidpoint[1]-ndim/2):int(vidpoint[1]+ndim/2)]
+#
+#     if fname is not None:
+#         sio.imsave(fname, subim)
+#
+#     return subim
