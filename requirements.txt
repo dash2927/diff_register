@@ -6,4 +6,4 @@ numba
 scikit-image
 scikit-fuzzy
 skan
-
+dipy
