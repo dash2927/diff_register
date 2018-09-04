@@ -348,8 +348,8 @@ def label_image(folder, image_file, area_thresh=50, figsize=(10, 10),
 
 
 def skeleton_image(folder, image_file, threshold=50, area_thresh=50,
-                   figsize=(10, 10), show=False, channel=0,
-                   disp_binary=True, imname=None):
+                   ajar=True, close=True, figsize=(10, 10),
+                   show=False, channel=0, disp_binary=True, imname=None):
     """Skeletonizes the image and returns properties of each skeleton.
 
     Composite function of binary_image, clean_image and skeletonizing
@@ -410,8 +410,8 @@ def skeleton_image(folder, image_file, threshold=50, area_thresh=50,
     sio.imsave(folder+'/'+filt, image0)
 
     # threshold the image
-    binary0 = binary_image(folder, filt, threshold=threshold,
-                           close=True, show=False)
+    binary0 = binary_image(folder, filt, threshold=threshold, ajar=ajar,
+                           close=close, show=False)
     clean = 'clean_{}'.format(filt)
 
     # label image
@@ -458,7 +458,7 @@ def skeleton_image(folder, image_file, threshold=50, area_thresh=50,
     plt.savefig('{}/{}'.format(folder, output))
 
     skel = Bunch(im=skeleton0, branchdat=branch_data_short, nbran=nbranches,
-                    shortim=short_image, props=props)
+                 shortim=short_image, props=props)
 
     return skel
 
