@@ -460,7 +460,7 @@ def skeleton_image(folder, image_file, threshold=50, area_thresh=50,
     return skel
 
 
-def mglia_features(props, branch_data_short, convert=False, umppx=1):
+def mglia_features(skeleton, umppx=1):
     """Assembles feature dataset from pre-processed cellular images
 
     Parameters
@@ -485,7 +485,8 @@ def mglia_features(props, branch_data_short, convert=False, umppx=1):
     Raises error if skeleton is missing from any cell in the binary image.
 
     """
-
+    props = skeleton.props
+    branch_data_short = skeleton.branchdat
     X = np.zeros((len(props)))
     Y = np.zeros((len(props)))
     perimeter = np.zeros((len(props)))
@@ -569,11 +570,7 @@ def mglia_features(props, branch_data_short, convert=False, umppx=1):
         # print(mglia_id)
         # print(np.min(min_function))
 
-    if convert:
-        factor = umppx
-    else:
-        factor = 1
-
+    factor = umppx
     features = pd.DataFrame({'X': X*factor,
                              'Y': Y*factor,
                              'perimeter': perimeter*factor,
