@@ -560,13 +560,24 @@ def mglia_features(skeleton, umppx=1):
     main_process_ord = [0]*len(nbranches)
 
     for i in range(0, len(xs)):
-        # print(xs[i], ys[i])
+        # print(i, xs[i], ys[i])
         skel_id = i
         min_function = np.square(xs[i] - X)+np.square(ys[i] - Y)
-        mglia_id = np.argmin(min_function)
-        nbranches_ord[mglia_id] = nbranches[skel_id]
-        avg_p_length_ord[mglia_id] = avg_p_length[skel_id]
-        main_process_ord[mglia_id] = main_process[skel_id]
+        try:
+            mglia_id = np.argmin(min_function)
+            nbranches_ord[mglia_id] = nbranches[skel_id]
+        except IndexError:
+            mglia_ids = np.argsort(min_function)
+            for idd in mglia_ids:
+                if idd < len(nbranches):
+                    mglia_id = idd
+                    break
+            nbranches_ord[mglia_id] = nbranches[skel_id
+                                                ] + nbranches_ord[mglia_id]
+        avg_p_length_ord[mglia_id] = avg_p_length[skel_id
+                                                  ] + avg_p_length_ord[mglia_id]
+        main_process_ord[mglia_id] = main_process[skel_id
+                                                  ] + main_process_ord[mglia_id]
         # print(mglia_id)
         # print(np.min(min_function))
 
