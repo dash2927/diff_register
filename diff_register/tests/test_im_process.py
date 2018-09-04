@@ -98,7 +98,28 @@ def test_label_image():
 
 
 def test_skeleton_image():
-    print()
+    np.random.seed(seed=1)
+    testim = np.random.exponential(1, size=(40, 40))
+    testim = testim / np.max(testim)
+    sio.imsave('test.tif', testim)
+
+    skeleton = imp.skeleton_image('.', 'test.tif', threshold=0.3,
+                                  area_thresh=0.1, tofilt=False, ajar=False,
+                                  close=False, imname='skel.tif',
+                                  channel=None, show=False)
+    assert np.round(np.average(skeleton.im), 3) == 0.136
+    assert np.sum(skeleton.bran) == 51
+    assert (51, 14) == skeleton.branchdat.values.shape
+    assert op.isfile('skel.tif')
+
+    skeleton = imp.skeleton_image('.', 'test.tif', threshold=0.01,
+                                  area_thresh=0.0, tofilt=True, ajar=True,
+                                  close=True, imname=None,
+                                  channel=None, show=False)
+    assert np.round(np.average(skeleton.im), 3) == 0.002
+    assert np.sum(skeleton.bran) == 1
+    assert (1, 14) == skeleton.branchdat.values.shape
+    assert op.isfile('skel_test.tif')
 
 
 def test_mglia_features():
