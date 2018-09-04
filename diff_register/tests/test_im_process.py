@@ -1,6 +1,7 @@
 import os.path as op
 import numpy as np
 import skimage.io as sio
+from skimage.morphology import square, opening, closing
 import diff_register.im_process as imp
 
 
