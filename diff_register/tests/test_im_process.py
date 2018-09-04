@@ -123,7 +123,23 @@ def test_skeleton_image():
 
 
 def test_mglia_features():
-    print()
+    np.random.seed(seed=1)
+    testim = np.random.binomial(1, 0.1, size=(40, 40))
+    testim = testim / np.max(testim)
+    # testim = closing(opening(opening(testim, square(3)),
+    # linsquare(3)), square(3))
+    testim = opening(closing(closing(testim, square(3)), square(3)), square(3))
+    sio.imsave('test.tif', testim)
+
+    skeleton = imp.skeleton_image('.', 'test.tif', threshold=0.4, area_thresh=1,
+                                  tofilt=False, ajar=False, close=True,
+                                  imname='skel.tif', channel=None)
+    mfeat = imp.mglia_features(skeleton)
+
+    assert 12 == np.sum(mfeat['total_branches'].values)
+    assert 15.8 == np.round(np.mean(mfeat['area'].values), 1)
+    assert 2.36 == np.round(np.mean(mfeat['average_branch'].values), 2)
+    assert 0.96 == np.round(np.mean(mfeat['solidity'].values), 2)
 
 
 def test_features_hist():
