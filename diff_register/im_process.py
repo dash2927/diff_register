@@ -485,6 +485,7 @@ def mglia_features(skeleton, umppx=1):
     Raises error if skeleton is missing from any cell in the binary image.
 
     """
+    #print('Successfully started')
     props = skeleton.props
     branch_data_short = skeleton.branchdat
     X = np.zeros((len(props)))
@@ -555,12 +556,12 @@ def mglia_features(skeleton, umppx=1):
         avg_p_length.append(bavg)
         main_process.append(blong)
 
-    nbranches_ord = [0]*len(nbranches)
-    avg_p_length_ord = [0]*len(nbranches)
-    main_process_ord = [0]*len(nbranches)
+    nbranches_ord = [0]*len(X)
+    avg_p_length_ord = [0]*len(X)
+    main_process_ord = [0]*len(X)
 
     for i in range(0, len(xs)):
-        # print(i, xs[i], ys[i])
+        #print(i, xs[i], ys[i])
         skel_id = i
         min_function = np.square(xs[i] - X)+np.square(ys[i] - Y)
         try:
