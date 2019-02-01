@@ -460,6 +460,34 @@ def skeleton_image(folder, image_file, threshold=50, area_thresh=50,
     return skel
 
 
+def labelandskel(binary_im):
+    # label, calculate properties, and skeletonize
+    clean_im = binary_im
+    lab_im = label(clean_im)
+    props = regionprops(lab_im)
+    skelim = skeletonize(clean_im)
+
+    # calculate skeleton properties
+    branch_data = csr.summarise(skelim)
+    branch_data_short = branch_data
+
+    cells = branch_data['skeleton-id'].max()
+    nbranches = []
+
+    for i in range(1, cells+1):
+        bcount = branch_data[branch_data['skeleton-id'
+                                         ] == i]['skeleton-id'].count()
+        if bcount > 0:
+            ids = branch_data.index[branch_data['skeleton-id'] == i].tolist()
+            nbranches.append(bcount)
+            for j in range(0, len(ids)):
+                branch_data_short.drop([ids[j]])
+
+    skel = Bunch(im=skelim, branchdat=branch_data_short, nbran=nbranches,
+                 shortim=clean_im, props=props)
+    return skel
+
+
 def mglia_features(skeleton, umppx=1):
     """Assembles feature dataset from pre-processed cellular images
 
