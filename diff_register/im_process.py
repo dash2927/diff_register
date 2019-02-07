@@ -33,7 +33,7 @@ def fuzzy_contrast(folder, image_file, figsize=(10, 10),
     figsize : tuple of int or float
         Size of output image
     show : bool
-        If True, outputs image to Jupyter notebook display.
+        If True, outputs image to Jupyter notebook display
     channel : int
         Channel of image to read in for multichannel images e.g.
         testim[:, :, channel]
@@ -104,9 +104,9 @@ def binary_image(folder, image_file, threshold=2, figsize=(10, 10),
     folder : string
         Directory containing image_file
     image_file : string
-        Filename of image to be analyzed.
+        Filename of image to be analyzed
     threshold : int or float
-        Intensity threshold of binary image.
+        Intensity threshold of binary image
     figsize : tuple of int or float
         Size of output figure
     ajar : bool
@@ -176,17 +176,17 @@ def clean_image(folder, image_file, threshold=2, figsize=(10, 10),
     folder : string
         Directory containing image_file
     image_file : string
-        Filename of image to be analyzed.
+        Filename of image to be analyzed
     threshold : int or float
-        Intensity threshold of binary image.
+        Intensity threshold of binary image
     figsize : tuple of int or float
         Size of output figure
     ajar : bool
         If True, opens binary image by performing a dilation followed by
-        an erosion.
+        an erosion
     close : bool
         If True, closes binary image by performing an erosion followed by a
-        dilation.
+        dilation
     show : bool
         If True, outputs image to Jupyter notebook display
     area_thresh : int or float
@@ -284,7 +284,7 @@ def label_image(folder, image_file, area_thresh=50, figsize=(10, 10),
     folder : string
         Directory containing image_file
     image_file : string
-        Filename of image to be analyzed.
+        Filename of image to be analyzed
     figsize : tuple of int or float
         Size of output figure
     show : bool
@@ -362,9 +362,17 @@ def skeleton_image(folder, image_file, threshold=50, area_thresh=50,
     image_file : string
         Filename of image to be analyzed
     threshold : int or float
-        Intensity threshold level for threshold.
+        Intensity threshold level for threshold
     area_thresh : int or float
         Size cutoff level to remove small objects
+    tofilt : bool
+    	If True, saves local median of image to folder with prefix 'filt_'
+    ajar : bool
+        If True, opens binary image by performing a dilation followed by
+        an erosion
+    close : bool
+        If True, closes binary image by performing an erosion followed by a
+        dilation
     figsize : tuple of int or float
         Size out output figure
     show : bool
@@ -399,11 +407,13 @@ def skeleton_image(folder, image_file, threshold=50, area_thresh=50,
     fname = '{}/{}'.format(folder, image_file)
     image0 = sio.imread(fname)
     if channel is None:
-        image0 = np.ceil(255 * (image0[:, :] / image0[:, :].max())).astype(int)
+        image0 = np.ceil(255 * (image0[:, :
+        							   ] / image0[:, :
+        							   			  ].max())).astype(int)
     else:
         image0 = np.ceil(255 * (image0[:, :, channel
-                                       ] / image0[:, :, channel
-                                                  ].max())).astype(int)
+        							   ] / image0[:, :, channel
+        							   			  ].max())).astype(int)
 
     if tofilt:
         image0 = skimage.filters.median(image0)
@@ -416,6 +426,7 @@ def skeleton_image(folder, image_file, threshold=50, area_thresh=50,
                                      close=close, imname='labelim.tif',
                                      channel=None, show=False)
     short_image = short_image > 1
+
     # Skeletonize
     skeleton0 = skeletonize(short_image)
 
@@ -426,17 +437,14 @@ def skeleton_image(folder, image_file, threshold=50, area_thresh=50,
     mglia = branch_data['skeleton-id'].max()
     nbranches = []
 
-    ncount = 0
     for i in range(1, mglia+1):
         bcount = branch_data[branch_data['skeleton-id'
                                          ] == i]['skeleton-id'].count()
         if bcount > 0:
             ids = branch_data.index[branch_data['skeleton-id'] == i].tolist()
             nbranches.append(bcount)
-            for j in range(0, len(ids)):
-                branch_data_short.drop([ids[j]])
+            branch_data_short.drop(ids)
 
-            ncount = ncount + 1
     if show:
         fig, ax = plt.subplots(figsize=figsize)
         if disp_binary:
