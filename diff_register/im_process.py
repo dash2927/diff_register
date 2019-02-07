@@ -409,11 +409,11 @@ def skeleton_image(folder, image_file, threshold=50, area_thresh=50,
     if channel is None:
         image0 = np.ceil(255 * (image0[:, :
         							   ] / image0[:, :
-        							   			  ].max())).astype(int)
+        							   			  ].max())).astype('uint8')
     else:
         image0 = np.ceil(255 * (image0[:, :, channel
         							   ] / image0[:, :, channel
-        							   			  ].max())).astype(int)
+        							   			  ].max())).astype('uint8')
 
     if tofilt:
         image0 = skimage.filters.median(image0)
