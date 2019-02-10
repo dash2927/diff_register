@@ -29,11 +29,11 @@ def fuzzy_contrast(folder, image_file, figsize=(10, 10),
     folder : string
         Directory containing image_file
     image_file : string
-        Filename of image to be analyzed
+        Filename of image to be analyzed.
     figsize : tuple of int or float
-        Size of output image
+        Size of output image.
     show : bool
-        If True, outputs image to Jupyter notebook display
+        If True, outputs image to Jupyter notebook display.
     channel : int
         Channel of image to read in for multichannel images e.g.
         testim[:, :, channel]
@@ -41,7 +41,7 @@ def fuzzy_contrast(folder, image_file, figsize=(10, 10),
     Returns
     -------
     rf_image : numpy.ndarray
-        Output image
+        Output image.
 
     Examples
     --------
@@ -104,11 +104,11 @@ def binary_image(folder, image_file, threshold=2, figsize=(10, 10),
     folder : string
         Directory containing image_file
     image_file : string
-        Filename of image to be analyzed
+        Filename of image to be analyzed.
     threshold : int or float
-        Intensity threshold of binary image
+        Intensity threshold of binary image.
     figsize : tuple of int or float
-        Size of output figure
+        Size of output figure.
     ajar : bool
         If True, opens binary image by performing a dilation followed by
         an erosion.
@@ -116,17 +116,17 @@ def binary_image(folder, image_file, threshold=2, figsize=(10, 10),
         If True, closes binary image by performing an erosion followed by a
         dilation.
     show : bool
-        If True, outputs image to Jupyter notebook display
+        If True, outputs image to Jupyter notebook display.
     channel : int
         Channel of image to read in for multichannel images e.g.
         testim[:, :, channel]
     imname : string
-        Desired name of output file. Defaults to 'test.png'
+        Desired name of output file. Defaults to 'test.png'.
 
     Returns
     -------
     op_image : numpy.ndarray
-        Output image
+        Output image.
 
     Examples
     --------
@@ -176,34 +176,34 @@ def clean_image(folder, image_file, threshold=2, figsize=(10, 10),
     folder : string
         Directory containing image_file
     image_file : string
-        Filename of image to be analyzed
+        Filename of image to be analyzed.
     threshold : int or float
-        Intensity threshold of binary image
+        Intensity threshold of binary image.
     figsize : tuple of int or float
-        Size of output figure
+        Size of output figure.
     ajar : bool
         If True, opens binary image by performing a dilation followed by
-        an erosion
+        an erosion.
     close : bool
         If True, closes binary image by performing an erosion followed by a
-        dilation
+        dilation.
     show : bool
-        If True, outputs image to Jupyter notebook display
+        If True, outputs image to Jupyter notebook display.
     area_thresh : int or float
-        Minimum square pixels for object to be included in final image
+        Minimum square pixels for object to be included in final image.
     channel : int
         Channel of image to read in for multichannel images e.g.
         testim[:, :, channel]
     imname : string
-        Desired name of output file. Defaults to 'test.png'
+        Desired name of output file. Defaults to 'test.png'.
 
     Returns
     -------
     short_image : numpy.ndarray
         Output binary image. All small objects (area < area_thresh) are
-        filtered out
+        filtered out.
     short_props : skimage.object
-        Contains all properties of objects identified in image
+        Contains all properties of objects identified in image.
 
     Examples
     --------
@@ -284,13 +284,13 @@ def label_image(folder, image_file, area_thresh=50, figsize=(10, 10),
     folder : string
         Directory containing image_file
     image_file : string
-        Filename of image to be analyzed
+        Filename of image to be analyzed.
     figsize : tuple of int or float
-        Size of output figure
+        Size of output figure.
     show : bool
-        If True, outputs image to Jupyter notebook display
+        If True, outputs image to Jupyter notebook display.
     area_thresh : int or float
-        Minimum square pixels for object to be included in final image
+        Minimum square pixels for object to be included in final image.
     channel : int
         Channel of image to read in for multichannel images e.g.
         testim[:, :, channel]
@@ -301,9 +301,9 @@ def label_image(folder, image_file, area_thresh=50, figsize=(10, 10),
     -------
     short_image : numpy.ndarray
         Output binary image. All small objects (area < area_thresh) are
-        filtered out
+        filtered out.
     short_props : skimage.object
-        Contains all properties of objects identified in image
+        Contains all properties of objects identified in image.
 
     Examples
     --------
@@ -360,43 +360,43 @@ def skeleton_image(folder, image_file, threshold=50, area_thresh=50,
     folder : string
         Directory containing image_file
     image_file : string
-        Filename of image to be analyzed
+        Filename of image to be analyzed.
     threshold : int or float
-        Intensity threshold level for threshold
+        Intensity threshold level for threshold.
     area_thresh : int or float
-        Size cutoff level to remove small objects
+        Size cutoff level to remove small objects.
     tofilt : bool
-    	If True, saves local median of image to folder with prefix 'filt_'
+    	If True, saves local median of image to folder with prefix 'filt_'.
     ajar : bool
         If True, opens binary image by performing a dilation followed by
-        an erosion
+        an erosion.
     close : bool
         If True, closes binary image by performing an erosion followed by a
-        dilation
+        dilation.
     figsize : tuple of int or float
-        Size out output figure
+        Size out output figure.
     show : bool
-        If True, prints image to Jupyter notebook
+        If True, prints image to Jupyter notebook.
     channel : int
         If multichannel is True, reads in image corresponding to this channel in
         file.
     disp_binary: bool
-        If True, prints binary image instead of raw image
+        If True, prints binary image instead of raw image.
     imname : string
-        Output filename
+        Output filename.
 
     Returns
     -------
     skeleton0 : numpy.ndarray
         Skeletonized version of input image_file
     branch_data_short : pandas.core.frame.DataFrame
-        Data associated with each branch found in input image
+        Data associated with each branch found in input image.
     nbranches : list
         Number of branches on each cell in branch_data_short
     short_image : numpy.ndarray
-        Cleaned up binary image from image_file prior to skeletonization
+        Cleaned up binary image from image_file prior to skeletonization.
     props : skimage.object
-        Contains all properties of objects identified in image
+        Contains all properties of objects identified in image.
 
     Examples
     --------
@@ -507,14 +507,14 @@ def mglia_features(skeleton, umppx=1):
     branch_data_short : blank
         Data from skeletonized cells. Output from im_process.skeleton_image
     convert : bool
-        If True, converts from pixels to microns using umppx
+        If True, converts from pixels to microns using umppx.
     umppx : int or float
-        Conversion ratio from pixels to microns
+        Conversion ratio from pixels to microns.
 
     Returns
     -------
     features : pandas.core.frames.DataFrame
-        Pandas dataframe of cellular features
+        Pandas dataframe of cellular features.
 
     Notes
     -----
@@ -646,11 +646,11 @@ def features_hist(features, feature, bin_size=100, bin_range=5000):
     features : pandas.core.frames.DataFrame
         Features output from mglia_features
     feature : string
-        Column name contained in features
+        Column name contained in features.
     bin_size : int or float
-        Changes resolution of histogram bars
+        Changes resolution of histogram bars.
     bin_range : int or float
-        Upper limit to plot of feature data
+        Upper limit to plot of feature data.
 
     """
 
